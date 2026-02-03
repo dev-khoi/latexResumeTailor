@@ -1,0 +1,177 @@
+{
+  "project": {
+    "name": "Resume Keyword Tweak Frontend",
+    "description": "Next.js application for resume keyword optimization with Supabase backend and HeroUI components",
+    "version": "0.0.1",
+    "type": "web-application"
+  },
+  "technology_stack": {
+    "frontend": {
+      "framework": "Next.js 15.5.9",
+      "bundler": "Turbopack",
+      "language": "TypeScript 5.6.3",
+      "uiLibrary": "HeroUI (NextUI successor)",
+      "styling": "Tailwind CSS 4.1.11",
+      "stateManagement": "React 18.3.1",
+      "animation": "Framer Motion 11.18.2"
+    },
+    "backend": {
+      "database": "Supabase (PostgreSQL)",
+      "auth": "@supabase/ssr 0.8.0",
+      "clientLibrary": "@supabase/supabase-js 2.91.0"
+    },
+    "devTools": {
+      "linter": "ESLint 9.25.1",
+      "formatter": "Prettier 3.5.3",
+      "typeChecker": "TypeScript 5.6.3"
+    }
+  },
+  "directory_structure": {
+    "app": {
+      "description": "Next.js App Router - pages, layouts, and routes",
+      "subdirectories": {
+        "about": "About page route",
+        "blog": "Blog section route",
+        "docs": "Documentation route",
+        "pricing": "Pricing page route"
+      }
+    },
+    "components": {
+      "description": "Reusable React components",
+      "key_files": [
+        "navbar.tsx",
+        "counter.tsx",
+        "icons.tsx",
+        "theme-switch.tsx",
+        "primitives.ts"
+      ]
+    },
+    "config": {
+      "description": "Application configuration",
+      "key_files": ["fonts.ts", "site.ts"]
+    },
+    "utils": {
+      "description": "Utility functions and helpers",
+      "subdirectories": {
+        "supabase": {
+          "description": "Supabase client setup for different contexts",
+          "files": [
+            "client.ts - Browser client",
+            "server.ts - Server-side client",
+            "middleware.ts - Middleware client",
+            "supabase.ts - Main client helper"
+          ]
+        }
+      }
+    },
+    "types": {
+      "description": "TypeScript type definitions",
+      "files": ["index.ts"]
+    },
+    "styles": {
+      "description": "Global styles",
+      "files": ["globals.css"]
+    },
+    "public": {
+      "description": "Static assets"
+    }
+  },
+  "key_dependencies": {
+    "ui_components": [
+      "@heroui/accordion",
+      "@heroui/alert",
+      "@heroui/autocomplete",
+      "@heroui/avatar",
+      "@heroui/badge",
+      "@heroui/button",
+      "@heroui/card",
+      "@heroui/chip",
+      "@heroui/code",
+      "@heroui/divider",
+      "@heroui/drawer",
+      "@heroui/dropdown",
+      "@heroui/form",
+      "@heroui/image",
+      "@heroui/input",
+      "@heroui/kbd",
+      "@heroui/link",
+      "@heroui/listbox",
+      "@heroui/modal",
+      "@heroui/navbar",
+      "@heroui/pagination",
+      "@heroui/popover",
+      "@heroui/progress",
+      "@heroui/radio",
+      "@heroui/scroll-shadow",
+      "@heroui/select",
+      "@heroui/skeleton",
+      "@heroui/snippet",
+      "@heroui/spacer",
+      "@heroui/spinner",
+      "@heroui/switch",
+      "@heroui/system",
+      "@heroui/table",
+      "@heroui/tabs",
+      "@heroui/theme",
+      "@heroui/toast",
+      "@heroui/tooltip",
+      "@heroui/user"
+    ],
+    "utilities": [
+      "clsx - Conditional class names",
+      "next-themes - Theme management",
+      "intl-messageformat - Internationalization"
+    ]
+  },
+  "environment_variables": {
+    "required": [
+      {
+        "name": "NEXT_PUBLIC_SUPABASE_URL",
+        "description": "Supabase project URL",
+        "scope": "public"
+      },
+      {
+        "name": "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+        "description": "Supabase anonymous/public key",
+        "scope": "public"
+      },
+      {
+        "name": "SUPABASE_SERVICE_ROLE_KEY",
+        "description": "Supabase service role key for server-side operations",
+        "scope": "private"
+      }
+    ]
+  },
+  "development_workflow": {
+    "setup": [
+      "1. Clone repository",
+      "2. Install dependencies: pnpm install",
+      "3. Configure environment variables in .env.local",
+      "4. Start dev server: pnpm dev"
+    ],
+    "commands": {
+      "dev": "pnpm dev - Start development server with Turbopack",
+      "build": "pnpm build - Create production build",
+      "start": "pnpm start - Start production server",
+      "lint": "pnpm lint - Run ESLint with auto-fix"
+    }
+  },
+  "architecture_patterns": {
+    "routing": "Next.js App Router (file-system based)",
+    "data_fetching": "React Server Components + Supabase",
+    "styling": "Tailwind CSS utility classes + HeroUI components",
+    "authentication": "Supabase Auth with SSR support",
+    "type_safety": "TypeScript with strict mode"
+  },
+  "best_practices": {
+    "component_structure": "Functional components with TypeScript",
+    "state_management": "React hooks (useState, useEffect, etc.)",
+    "supabase_clients": {
+      "browser": "Use utils/supabase/client.ts",
+      "server": "Use utils/supabase/server.ts with cookies",
+      "middleware": "Use utils/supabase/middleware.ts"
+    },
+    "styling": "Use HeroUI components with Tailwind utility classes",
+    "type_definitions": "Define types in types/index.ts"
+  }
+}
