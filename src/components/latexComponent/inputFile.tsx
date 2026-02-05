@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { uploadLatexFile } from "@/utils/database/buckets/uploadFile"
+import { uploadLatexFile } from "@/database/storage/resume"
 
 import { createClient } from "@/lib/supabase/client"
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 
 import { Button } from "../ui/button"
 
-export function InputFile() {
+export default function InputFile() {
   const [pending, setPending] = useState(false)
   const [latexFile, setLatexFile] = useState<File | undefined>()
   const [error, setError] = useState<string>("")
@@ -46,7 +46,9 @@ export function InputFile() {
       const supabase = createClient()
       const { data } = await supabase.auth.getUser()
       const userId = data.user?.id
+      console.log(userId)
       const result = await uploadLatexFile(latexFile, userId)
+      console.log(result)
       if (result.success && result.data) {
         setSuccess("file uploaded sucessfully!")
         setLatexFile(undefined)
@@ -77,7 +79,7 @@ export function InputFile() {
           setLatexFile(file)
         }}
       />
-      <FieldDescription>Upload your LaTeX resume file (.tex)</FieldDescription>
+      <FieldDescription>Upload your LaTeX resume file</FieldDescription>
       {error && <div className="text-red-500 text-sm mt-1">{error}</div>}
       {success && (
         <div className="text-green-600 dark:text-green-400 text-sm mt-1">
@@ -92,10 +94,4 @@ export function InputFile() {
   )
 }
 
-export default function UploadResumeButton() {
-  return (
-    <>
-      <InputFile />
-    </>
-  )
-}
+

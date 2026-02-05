@@ -67,6 +67,7 @@ export function LoginForm({
       })
       if (error) throw error
       if (data.session) {
+        
         window.location.href = "/protected"
       }
     } catch (error: unknown) {

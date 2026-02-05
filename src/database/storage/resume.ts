@@ -1,0 +1,230 @@
+import { createClient } from "@/lib/supabase/client"
+
+export interface UploadResult {
+  success: boolean
+  data?: {
+    path: string
+    fullPath: string
+  }
+  error?: string
+}
+
+/**
+ * Uploads a LaTeX file to Supabase storage
+ * @param file - The LaTeX file to upload
+ * @param userId - The user ID (optional, for organizing files by user)
+ * @returns Upload result with path or error
+ */
+export async function uploadLatexFile(
+  file: File,
+  userId?: string
+): Promise<UploadResult> {
+  try {
+    const supabase = createClient()
+
+    // Generate a unique filename to avoid collisions
+    const timestamp = Date.now()
+    const fileExt = file.name.split(".").pop()
+    const fileName = `${file.name.replace(
+      `.${fileExt}`,
+      ""
+    )}_${timestamp}.${fileExt}`
+
+    // Create path structure: latex-files/userId/filename or latex-files/public/filename
+    const folder = userId ? `${userId}` : "public"
+    const filePath = `${folder}/${fileName}`
+    // Upload the file to the 'latex-files' bucket
+    // const {data, error} = getLatexFileUrl(filePath)
+    // guard
+    const fileUrl = await getLatexFileUrl(filePath)
+    if (fileUrl) {
+      return {
+        success: false,
+        error: "file existed",
+      }
+    }
+    const { data, error } = await supabase.storage
+      .from("latexResume")
+      .upload(filePath, file, {
+        cacheControl: "3600",
+        upsert: false, // Don't overwrite existing files
+        contentType: "text/x-tex", // LaTeX MIME type
+      })
+
+    if (error) {
+      console.log("Upload error:", error)
+      return {
+        success: false,
+        error: error.message,
+      }
+    }
+
+    return {
+      success: true,
+      data: {
+        path: data.path,
+        fullPath: data.fullPath,
+      },
+    }
+  } catch (error) {
+    console.error("Unexpected error during upload:", error)
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error occurred",
+    }
+  }
+}
+
+/**
+ * Gets the public URL for an uploaded file
+ * @param path - The file path returned from upload
+ * @returns Public URL or null if error
+ */
+export async function getLatexFileUrl(path: string): Promise<string | null> {
+  const supabase = createClient()
+  const { data, error } = await supabase.storage
+    .from("latexResume")
+    .createSignedUrl(path, 60 * 10) // 10 minutes
+
+  console.log(data)
+  if (error) {
+    console.error("Error getting signed URL:", error)
+    return null
+  }
+
+  return data.signedUrl
+}
+
+export async function getSignedUrl(url: string) {
+  try {
+    const supabase = createClient()
+    const { data } = await supabase.storage
+      .from("latexResume")
+      .createSignedUrl(url, 60)
+
+    return data?.signedUrl
+  } catch (e) {
+    console.error(e)
+  }
+}
+/**
+ * Deletes a LaTeX file from storage
+ * @param path - The file path to delete
+ * @returns Success boolean
+ */
+export async function deleteLatexFile(path: string): Promise<boolean> {
+  try {
+    const supabase = createClient()
+    const { error } = await supabase.storage.from("latexResume").remove([path])
+
+    if (error) {
+      console.error("Delete error:", error)
+      return false
+    }
+
+    return true
+  } catch (error) {
+    console.error("Unexpected error during delete:", error)
+    return false
+  }
+}
+
+export interface Resume {
+  id: string
+  user_id: string
+  file_name: string
+  file_path: string
+  file_size_bytes: number | null
+  file_type: string
+  original_file_name: string
+  version: number
+  is_active: boolean
+  description: string | null
+  tags: string[] | null
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+
+export async function getAllUserLatexFiles() {
+  const supabase = createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) return { success: false, error: "Not authenticated" }
+
+  const { data, error } = await supabase
+    .from("user_resumes")
+    .select("*")
+    .eq("user_id", user.id)
+    .is("deleted_at", null)
+    .order("created_at", { ascending: false })
+
+  if (error) return { success: false, error: error.message }
+  return { success: true, data: data || [] }
+}
+
+/**
+ * Gets the main (active) resume for the current user
+ * @returns Main resume or null if none is set
+ */
+export async function getMainResume() {
+  const supabase = createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) return { success: false, error: "Not authenticated" }
+
+  const { data, error } = await supabase
+    .from("user_resumes")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("is_active", true)
+    .is("deleted_at", null)
+    .single()
+
+  if (error && error.code !== "PGRST116") {
+    // PGRST116 = no rows returned
+    return { success: false, error: error.message }
+  }
+  return { success: true, data: data || null }
+}
+
+/**
+ * Sets a resume as the main (active) resume
+ * @param resumeId - The resume ID to set as main
+ * @returns Success boolean
+ */
+export async function setMainResume(resumeId: string) {
+  const supabase = createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) return { success: false, error: "Not authenticated" }
+
+  // First, deactivate all other resumes for this user
+  const { error: deactivateError } = await supabase
+    .from("user_resumes")
+    .update({ is_active: false })
+    .eq("user_id", user.id)
+
+  if (deactivateError) {
+    return { success: false, error: deactivateError.message }
+  }
+
+  // Then activate the selected resume
+  const { error: activateError } = await supabase
+    .from("user_resumes")
+    .update({ is_active: true })
+    .eq("id", resumeId)
+    .eq("user_id", user.id)
+
+  if (activateError) {
+    return { success: false, error: activateError.message }
+  }
+
+  return { success: true }
+}
