@@ -20,7 +20,7 @@ export default function MainLatexButton() {
 
       {/* View All Resumes Button */}
       <div className="flex justify-center">
-        <ResumeListButton />
+        <ResumeListButton onMainResumeChange={handleResumeChange} />
       </div>
     </div>
   )

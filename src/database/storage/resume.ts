@@ -166,10 +166,11 @@ export async function getAllUserLatexFiles() {
 }
 
 /**
- * Gets the main (active) resume for the current user
- * @returns Main resume or null if none is set
+ * Gets a specific resume by ID
+ * @param resumeId - The resume ID to fetch
+ * @returns Resume or null if not found
  */
-export async function getMainResume() {
+export async function getResumeById(resumeId: string) {
   const supabase = createClient()
   const {
     data: { user },
@@ -180,8 +181,8 @@ export async function getMainResume() {
   const { data, error } = await supabase
     .from("user_resumes")
     .select("*")
+    .eq("id", resumeId)
     .eq("user_id", user.id)
-    .eq("is_active", true)
     .is("deleted_at", null)
     .single()
 
@@ -193,38 +194,35 @@ export async function getMainResume() {
 }
 
 /**
- * Sets a resume as the main (active) resume
- * @param resumeId - The resume ID to set as main
- * @returns Success boolean
+ * Gets the main resume from localStorage
+ * @returns Main resume or null if none is set
  */
-export async function setMainResume(resumeId: string) {
-  const supabase = createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+export async function getMainResume() {
+  const mainResumeId = localStorage.getItem("mainResumeId")
 
-  if (!user) return { success: false, error: "Not authenticated" }
-
-  // First, deactivate all other resumes for this user
-  const { error: deactivateError } = await supabase
-    .from("user_resumes")
-    .update({ is_active: false })
-    .eq("user_id", user.id)
-
-  if (deactivateError) {
-    return { success: false, error: deactivateError.message }
+  if (!mainResumeId) {
+    return { success: true, data: null }
   }
 
-  // Then activate the selected resume
-  const { error: activateError } = await supabase
-    .from("user_resumes")
-    .update({ is_active: true })
-    .eq("id", resumeId)
-    .eq("user_id", user.id)
+  return await getResumeById(mainResumeId)
+}
 
-  if (activateError) {
-    return { success: false, error: activateError.message }
+/**
+ * Sets a resume as the main resume in localStorage
+ * @param resumeId - The resume ID to set as main
+ */
+export function setMainResume(resumeId: string | null) {
+  if (resumeId) {
+    localStorage.setItem("mainResumeId", resumeId)
+  } else {
+    localStorage.removeItem("mainResumeId")
   }
+}
 
-  return { success: true }
+/**
+ * Gets the current main resume ID from localStorage
+ * @returns Main resume ID or null
+ */
+export function getMainResumeId(): string | null {
+  return localStorage.getItem("mainResumeId")
 }

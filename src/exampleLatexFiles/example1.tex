@@ -1,0 +1,198 @@
+%-------------------------
+% Resume in Latex
+% Author : Jake Gutierrez
+% Based off of: https://github.com/sb2nov/resume
+% License : MIT
+%------------------------
+
+\documentclass[letterpaper,11pt]{article}
+
+\usepackage{latexsym}
+\usepackage[empty]{fullpage}
+\usepackage{titlesec}
+\usepackage{marvosym}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{verbatim}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fancyhdr}
+\usepackage[english]{babel}
+\usepackage{tabularx}
+\input{glyphtounicode}
+
+
+%----------FONT OPTIONS----------
+% sans-serif
+% \usepackage[sfdefault]{FiraSans}
+% \usepackage[sfdefault]{roboto}
+% \usepackage[sfdefault]{noto-sans}
+% \usepackage[default]{sourcesanspro}
+
+% serif
+% \usepackage{CormorantGaramond}
+% \usepackage{charter}
+
+
+\pagestyle{fancy}
+\fancyhf{} % clear all header and footer fields
+\fancyfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Adjust margins
+\addtolength{\oddsidemargin}{-0.5in}
+\addtolength{\evensidemargin}{-0.5in}
+\addtolength{\textwidth}{1in}
+\addtolength{\topmargin}{-.5in}
+\addtolength{\textheight}{1.0in}
+
+\urlstyle{same}
+
+\raggedbottom
+\raggedright
+\setlength{\tabcolsep}{0in}
+
+% Sections formatting
+\titleformat{\section}{
+  \vspace{-4pt}\scshape\raggedright\large
+}{}{0em}{}[\color{black}\titlerule \vspace{-5pt}]
+
+% Ensure that generate pdf is machine readable/ATS parsable
+\pdfgentounicode=1
+
+%-------------------------
+% Custom commands
+\newcommand{\resumeItem}[1]{
+  \item\small{
+    {#1 \vspace{-2pt}}
+  }
+}
+
+\newcommand{\resumeSubheading}[4]{
+  \vspace{-2pt}\item
+    \begin{tabular*}{0.97\textwidth}[t]{l@{\extracolsep{\fill}}r}
+      \textbf{#1} & #2 \\
+      \textit{\small#3} & \textit{\small #4} \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeSubSubheading}[2]{
+    \item
+    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+      \textit{\small#1} & \textit{\small #2} \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeProjectHeading}[2]{
+    \item
+    \begin{tabular*}{0.97\textwidth}{l@{\extracolsep{\fill}}r}
+      \small#1 & #2 \\
+    \end{tabular*}\vspace{-7pt}
+}
+
+\newcommand{\resumeSubItem}[1]{\resumeItem{#1}\vspace{-4pt}}
+
+\renewcommand\labelitemii{$\vcenter{\hbox{\tiny$\bullet$}}$}
+
+\newcommand{\resumeSubHeadingListStart}{\begin{itemize}[leftmargin=0.15in, label={}]}
+\newcommand{\resumeSubHeadingListEnd}{\end{itemize}}
+\newcommand{\resumeItemListStart}{\begin{itemize}}
+\newcommand{\resumeItemListEnd}{\end{itemize}\vspace{-5pt}}
+
+%-------------------------------------------
+%%%%%%  RESUME STARTS HERE  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{document}
+
+%----------HEADING----------
+% \begin{tabular*}{\textwidth}{l@{\extracolsep{\fill}}r}
+%   \textbf{\href{http://sourabhbajaj.com/}{\Large Sourabh Bajaj}} & Email : \href{mailto:sourabh@sourabhbajaj.com}{sourabh@sourabhbajaj.com}\\
+%   \href{http://sourabhbajaj.com/}{http://www.sourabhbajaj.com} & Mobile : +1-123-456-7890 \\
+% \end{tabular*}
+
+\begin{center}
+    \textbf{\Huge \scshape Khoi Nguyen} \\ \vspace{1pt}
+    \small 647-471-5363 $|$ \href{https://dev-khoi.github.io/portfolio/}{\underline{portfolio}} $|$ \href{mailto:daknguyen111@gmail.com}{\underline{daknguyen111@gmail.com}} $|$ 
+    \href{https://www.linkedin.com/in/daknguyen/}{\underline{linkedin.com/in/daknguyen/}} $|$
+    \href{https://github.com/dev-khoi}{\underline{github.com/dev-khoi}}
+\end{center}
+%-----------EDUCATION-----------
+\section{Education}
+  \resumeSubHeadingListStart
+    \resumeSubheading
+      {Seneca Polytechnic}{Toronto, ON}
+      {Honours Bachelor of Technology – Software Development}{Sep 2024 - Jun 2028}
+      \resumeItemListStart
+        \resumeItem{GPA: \textbf{3.9/4.0}}
+        \resumeItem{Related coursework: Web programming (Node.js, Express, HTML, CSS), Object-Oriented Software Development (C++), System Development (Python),  Operating Systems, Database (Oracle SQL, MongoDB), System Analysis and Design (Jira, Agile methodology) }
+        \resumeItemListEnd
+\resumeSubHeadingListEnd
+
+%-----------PROGRAMMING SKILLS-----------
+\section{Technical Skills}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+\small{\item{
+ \textbf{Languages}{: TypeScript, JavaScript, Python, HTML/CSS, C++} \\
+ \textbf{Frameworks \& Runtimes}{: React, Next.js, Node.js, Express, FastAPI} \\
+ \textbf{Databases}{: MongoDB, PostgreSQL, Oracle SQL, Supabase} \\
+ \textbf{Testing}{: Playwright, Vitest} \\
+ \textbf{Developer Tools}{: Git, GitHub Actions, Jira, Prisma, Ngrok, Docker} \\
+ \textbf{APIs \& Services}{: Clerk, OAuth, REST APIs} \\
+ \textbf{Cloud Platforms}{: AWS (Foundational: EC2, VPC, IAM, Lambda, S3, DynamoDB, API Gateway, CloudFront, KMS)
+}}
+ \end{itemize}
+
+%-----------PROJECTS-----------
+\section{Projects}
+    \resumeSubHeadingListStart
+      \resumeProjectHeading
+       {\textbf{AlgoBridge}
+$|$ Next.js, FastAPI, Python, MongoDB, Clerk, Webhooks, Ngrok}{\href{https://algobridge-ui.vercel.app/}{Dec 2025}}
+
+\resumeItemListStart
+\resumeItem{Designed and implemented an email-based trading notification feature for a small community lacking access to Composer.trade platform}
+  \resumeItem{Developed a cron-scheduled backend email notification service using \textbf{FastAPI}, \textbf{APScheduler}, and Google \textbf{SMTP} to send daily trading strategy updates automatically to\textbf{ 10+ subscribers} }
+  \resumeItem{Built \textbf{webhook consumers} to sync Clerk identity data to MongoDB with \textbf{100\% consistency}, configuring \textbf{Ngrok} for secure local development and webhook delivery. }
+    \resumeItem{Built passwordless, email-based magic-link authentication with \textbf{Clerk}, enabling seamless and secure tokenized user logins. }
+  \resumeItem{Developed a \textbf{Next.js} + \textbf{FastAPI–MongoDB} system to deliver daily trading notifications to \textbf{10+ users}. }
+\resumeItemListEnd
+\resumeProjectHeading
+{\textbf{WeatherComp}
+$|$ \emph{TypeScript, React, Express, Prisma, GitHub Actions, Docker, Playwright}
+ }{\href{https://weathercomp.onrender.com/}{Aug 2025}}
+\resumeItemListStart
+\resumeItem{Developed a responsive, customizable weather dashboard with drag-and-resize widgets to reduce scroll fatigue and improve user interaction efficiency. }
+  \resumeItem{Developed a \textbf{TypeScript} \textbf{Express} backend with \textbf{REST APIs} for user-specific layouts and preferences}
+    \resumeItem{Modeled and managed relational database using \textbf{Prisma ORM} and \textbf{Supabase}, supporting \textbf{full \textbf{CRUD} operations} on dashboard layouts}
+  \resumeItem{Built a custom authentication system with \textbf{JWTs} and \textbf{Google OAuth} for secure access and personalization}
+  \resumeItem{Integrated \textbf{OpenWeather API} and \textbf{Gemini-assisted chatbot}, providing real-time weather insights and forecast data within \textbf{3 seconds}.}
+  \resumeItem{Designed and implemented a CI/CD pipeline with \textbf{GitHub Actions} and \textbf{Docker}, automatically building images, running \textbf{Vitest} unit/integration tests, and executing \textbf{Playwright} end-to-end tests on \textbf{every push}}
+\resumeItemListEnd
+        \resumeSubHeadingListEnd
+
+
+
+%-----------PROGRAMMING SKILLS-----------
+\section{Work Experience }
+\resumeSubHeadingListStart
+    \resumeSubheading
+{Workshop Artist and Marketing Coordinator}
+  {Feb 2025 - Present}
+  {Fuzzy Lab}
+  {Toronto, ON}      
+      \resumeItemListStart
+        \resumeItem{Delivered workshops to \textbf{1,000+ customers} and contributed to \textbf{60+ 5-star reviews}, demonstrating rapid learning, communication, and problem-solving skills}
+        \resumeItem{Managed social media content, creating videos and posts that generated \textbf{100,000+ engagements}, highlighting creativity and project execution skills}
+         \resumeItem{Collaborated with a team of \textbf{5} and checked Shopify appointments, demonstrating technical adaptability and attention to detail}
+
+        \resumeItemListEnd
+\resumeSubHeadingListEnd
+
+%-----------CERTIFICATION-----------
+\section{CERTIFICATIONS}
+      {AWS Introduction to Cloud -- Builder Labs Learning Plan (AWS Skill Builder)}
+
+
+%-------------------------------------------
+\end{document}

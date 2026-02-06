@@ -5,9 +5,10 @@ import {
   deleteLatexFile,
   getLatexFileUrl,
   getMainResume,
+  setMainResume as setMainResumeInStorage,
   type Resume,
 } from "@/database/storage/resume"
-import { Download, FileText, Loader2, Trash2 } from "lucide-react"
+import { Download, FileText, Loader2, Trash2, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -17,6 +18,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+
+import { ViewResumeButton } from "./latexVersion/viewResume"
 
 export function MainResumeDisplay({
   onResumeChange,
@@ -33,7 +36,6 @@ export function MainResumeDisplay({
     setError("")
     const result = await getMainResume()
     if (result.success) {
-        
       setMainResume(result.data)
     } else {
       setError(result.error || "Failed to load main resume")
@@ -63,6 +65,8 @@ export function MainResumeDisplay({
     const success = await deleteLatexFile(mainResume.file_path)
 
     if (success) {
+      // Clear from localStorage
+      setMainResumeInStorage(null)
       setMainResume(null)
       onResumeChange?.()
     } else {
@@ -89,82 +93,78 @@ export function MainResumeDisplay({
 
   if (loading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Main Resume</CardTitle>
-          <CardDescription>Your currently selected resume file</CardDescription>
+      <>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Based Resume</CardTitle>
         </CardHeader>
-        <CardContent className="flex items-center justify-center py-6">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </CardContent>
-      </Card>
+        <Card className="py-3 w-60 h-70 !mt-0">
+          <CardContent className="flex items-center justify-center space-y-3 !py-6 !pb-6">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </CardContent>
+        </Card>
+      </>
     )
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Main Resume</CardTitle>
-        <CardDescription>Your currently selected resume file</CardDescription>
+    <>
+      <CardHeader className="py-2">
+        <CardTitle className="text-base">Based Resume</CardTitle>
       </CardHeader>
-      <CardContent>
-        {error && (
-          <div className="mb-4 rounded-md bg-red-50 dark:bg-red-950 p-3 text-sm text-red-600 dark:text-red-400">
-            {error}
-          </div>
-        )}
-
-        {!mainResume ? (
-          <div className="text-center py-6 text-muted-foreground">
-            <FileText className="h-10 w-10 mx-auto mb-2 opacity-50" />
-            <p className="font-medium">No main resume selected</p>
-            <p className="text-sm mt-1">
-              Upload a resume or select one from your files
-            </p>
-          </div>
-        ) : (
-          <div className="flex items-center justify-between gap-4 rounded-lg border p-4 bg-accent/30">
-            <div className="flex items-start gap-3 flex-1 min-w-0">
-              <FileText className="h-5 w-5 mt-0.5 text-primary flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="font-medium truncate">
-                  {mainResume.original_file_name}
-                </p>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-                  <span>{formatFileSize(mainResume.file_size_bytes)}</span>
-                  <span>•</span>
-                  <span>{formatDate(mainResume.created_at)}</span>
-                </div>
-                {mainResume.description && (
-                  <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
-                    {mainResume.description}
-                  </p>
-                )}
-              </div>
+      <Card className=" w-60 h-70 !mt-0 !pb-0">
+        <CardContent className="space-y-3 !py-6 !pb-6 flex flex-col">
+          {error && (
+            <div className="rounded-md bg-red-50 dark:bg-red-950 p-2 text-xs text-red-600 dark:text-red-400">
+              {error}
             </div>
+          )}
 
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <Button variant="outline" size="sm" onClick={handleView}>
-                <Download className="h-4 w-4" />
-                <span className="sr-only">View</span>
-              </Button>
+          {!mainResume ? (
+            <div className="text-center py-4 text-muted-foreground">
+              <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <p className="text-sm font-medium">No resume selected</p>
+              <p className="text-xs mt-1">Upload or select a file</p>
+            </div>
+          ) : (
+            <>
               <Button
                 variant="destructive"
                 size="sm"
-                onClick={handleDelete}
-                disabled={deleting}
+                onClick={() => {
+                  setMainResumeInStorage(null)
+                  setMainResume(null)
+                  onResumeChange?.()
+                }}
+                className="text-xs size-2 absolute self-end"
               >
-                {deleting ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Trash2 className="h-4 w-4" />
-                )}
-                <span className="sr-only">Delete</span>
+                <X className="h-3 w-3" />
               </Button>
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+
+              <div className="space-y-3">
+                <div className="flex flex-col items-center text-center gap-2">
+                  <div className="rounded-lg bg-primary/10 p-3">
+                    <FileText className="h-6 w-6 text-primary" />
+                  </div>
+                  <div className="w-full min-w-0">
+                    <p
+                      className="font-medium text-sm truncate px-2"
+                      title={mainResume.original_file_name}
+                    >
+                      {mainResume.original_file_name}
+                    </p>
+                    <div className="flex flex-col gap-0.5 text-xs text-muted-foreground mt-1">
+                      <span>{formatFileSize(mainResume.file_size_bytes)}</span>
+                      <span className="text-[10px]">
+                        {formatDate(mainResume.created_at)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
+    </>
   )
 }

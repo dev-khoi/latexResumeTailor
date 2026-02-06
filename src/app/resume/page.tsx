@@ -2,7 +2,9 @@
 
 import { getLatexFileUrl, getSignedUrl } from "@/database/storage/resume"
 
+import { compileAndPreviewPdf } from "@/lib/latexCompiler"
 import { Button } from "@/components/ui/button"
+import { LatexEditor } from "@/components/latexComponent/editor/latexEditor"
 import UploadResumeButton from "@/components/latexComponent/inputFile"
 import ResumeList from "@/components/latexComponent/latexVersion/latexVersionRetrieval"
 import ResumeListButton from "@/components/latexComponent/latexVersion/latexVersionRetrieval"
@@ -32,7 +34,7 @@ export default function Home() {
           <MainLatexButton />
         </aside>
         {/* main bar */}
-        <Button
+        {/* <Button
         // onClick={async () => {
         //   const signedUrl = await getSignedUrl(
         //     "551495a0-7848-4cbc-a118-8a85c1e86e08/example_1770258914855.tex"
@@ -40,9 +42,18 @@ export default function Home() {
 
         //   window.location.href = signedUrl
         // }}
-        ></Button>
-
-        <section className="flex-1 h-full min-h-[600px] rounded-3xl border border-white/10 bg-white/5 p-6 shadow-2xl shadow-slate-950/60 backdrop-blur"></section>
+        ></Button> */}
+        <Button
+          onClick={() => {
+            const a = compileAndPreviewPdf()
+            console.log(a)
+          }}
+        >
+          compileAndPreviewPdf
+        </Button>
+        <section className="flex-1 min-h-[600px] rounded-3xl border border-white/10 bg-white/5 shadow-2xl shadow-slate-950/60 backdrop-blur overflow-hidden p-6">
+          <LatexEditor />
+        </section>
       </div>
     </div>
   )

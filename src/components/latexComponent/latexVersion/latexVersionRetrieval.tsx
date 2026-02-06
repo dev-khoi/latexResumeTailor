@@ -6,6 +6,7 @@ import {
   deleteLatexFile,
   getAllUserLatexFiles,
   getLatexFileUrl,
+  getMainResumeId,
   setMainResume,
   type Resume,
 } from "@/database/storage/resume"
@@ -37,12 +38,17 @@ import {
 
 import { ViewResumeButton } from "./viewResume"
 
-export function ResumeList() {
+export function ResumeList({
+  onMainResumeChange,
+}: {
+  onMainResumeChange?: () => void
+}) {
   const [resumes, setResumes] = useState<Resume[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string>("")
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [settingMainId, setSettingMainId] = useState<string | null>(null)
+  const [mainResumeId, setMainResumeIdState] = useState<string | null>(null)
 
   const loadResumes = async () => {
     setLoading(true)
@@ -59,6 +65,7 @@ export function ResumeList() {
 
   useEffect(() => {
     loadResumes()
+    setMainResumeIdState(getMainResumeId())
   }, [])
 
   const handleDelete = async (resume: Resume) => {
@@ -75,22 +82,13 @@ export function ResumeList() {
     setDeletingId(null)
   }
 
-  const handleSetMain = async (resumeId: string) => {
-    setSettingMainId(resumeId)
-    const result = await setMainResume(resumeId)
+  const handleSetMain = (resumeId: string) => {
+    // Save to localStorage
+    setMainResume(resumeId)
+    setMainResumeIdState(resumeId)
 
-    if (result.success) {
-      // Update local state to reflect the change
-      setResumes((prev) =>
-        prev.map((r) => ({
-          ...r,
-          is_active: r.id === resumeId,
-        }))
-      )
-    } else {
-      setError(result.error || "Failed to set main resume")
-    }
-    setSettingMainId(null)
+    // Notify parent to refresh main resume display
+    onMainResumeChange?.()
   }
 
   const formatFileSize = (bytes: number | null) => {
@@ -165,25 +163,27 @@ export function ResumeList() {
 
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <Button
-                      variant={resume.is_active ? "default" : "outline"}
+                      variant={
+                        mainResumeId === resume.id ? "default" : "outline"
+                      }
                       size="sm"
                       onClick={() => handleSetMain(resume.id)}
-                      disabled={settingMainId === resume.id || resume.is_active}
+                      disabled={mainResumeId === resume.id}
                       title={
-                        resume.is_active ? "Current main resume" : "Set as main"
+                        mainResumeId === resume.id
+                          ? "Current main resume"
+                          : "Set as main"
                       }
                     >
-                      {settingMainId === resume.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Star
-                          className={`h-4 w-4 ${
-                            resume.is_active ? "fill-current" : ""
-                          }`}
-                        />
-                      )}
+                      <Star
+                        className={`h-4 w-4 ${
+                          mainResumeId === resume.id ? "fill-current" : ""
+                        }`}
+                      />
                       <span className="sr-only">
-                        {resume.is_active ? "Main resume" : "Set as main"}
+                        {mainResumeId === resume.id
+                          ? "Main resume"
+                          : "Set as main"}
                       </span>
                     </Button>
                     <ViewResumeButton
@@ -215,7 +215,11 @@ export function ResumeList() {
   )
 }
 
-export default function ResumeListButton() {
+export default function ResumeListButton({
+  onMainResumeChange,
+}: {
+  onMainResumeChange?: () => void
+}) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -233,7 +237,7 @@ export default function ResumeListButton() {
             Manage your uploaded LaTeX resume files
           </DialogDescription>
         </DialogHeader>
-        <ResumeList />
+        <ResumeList onMainResumeChange={onMainResumeChange} />
       </DialogContent>
     </Dialog>
   )
