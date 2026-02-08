@@ -23,16 +23,6 @@ describe("Resume Tailor Agent", () => {
   it("should extract keywords and suggest edits", async () => {
     const result = await scanAndSuggestEdits(sampleLatex, sampleJobDescription)
 
-    console.log("\n📊 AI Analysis Results:")
-    console.log("=".repeat(50))
-    console.log("\n🔑 Extracted Keywords:", result.keywords)
-    console.log("\n✏️  Suggested Edits:")
-    result.edits.forEach((edit, idx) => {
-      console.log(`\n  Edit ${idx + 1}:`)
-      console.log(`  Reason: ${edit.reason}`)
-      console.log(`  Original: "${edit.original}"`)
-      console.log(`  Updated: "${edit.updated}"`)
-    })
     console.log("\n" + "=".repeat(50))
 
     expect(result).toBeDefined()
@@ -56,14 +46,10 @@ describe("Resume Tailor Agent", () => {
       },
     ]
 
-    console.log("\n🔧 Applying Edits:")
-    console.log("=".repeat(50))
-    console.log("\n📄 Original LaTeX:\n", sampleLatex)
 
     const result = await applySmallEdits(sampleLatex, edits)
 
-    console.log("\n✨ Modified LaTeX:\n", result)
-    console.log("\n" + "=".repeat(50))
+
 
     expect(result).toContain("React and TypeScript")
     expect(result).toContain("Agile environment")

@@ -7,8 +7,7 @@ import { ExternalLink, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 interface OpenLatexInOverleafProps {
-  filePath: string
-  fileName?: string
+  latexContent: string | null
   className?: string
   variant?: "default" | "outline" | "ghost" | "secondary"
 }
@@ -20,34 +19,25 @@ interface OpenLatexInOverleafProps {
  * @param fileName - Optional custom label for the button
  */
 export function OpenLatexInOverleaf({
-  filePath,
-  fileName = "Open in Overleaf",
+  latexContent,
   className = "",
   variant = "default",
 }: OpenLatexInOverleafProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string>("")
-
   const handleOpenInOverleaf = async () => {
     try {
       setIsLoading(true)
       setError("")
 
-      // Get signed URL from Supabase
-      const signedUrl = await getLatexFileUrl(filePath)
-
-      if (!signedUrl) {
-        throw new Error("Failed to get file URL")
+      // Validate LaTeX content exists
+      if (!latexContent || latexContent.length === 0) {
+        throw new Error("No LaTeX content available to open in Overleaf")
       }
-
-      // Fetch the actual LaTeX content
-      const response = await fetch(signedUrl)
-      if (!response.ok) {
-        throw new Error("Failed to fetch file content")
-      }
-      const latexContent = await response.text()
 
       // Create a form to POST the content to Overleaf
+      // Overleaf guides to use form
+      // https://www.overleaf.com/devs
       const form = document.createElement("form")
       form.method = "POST"
       form.action = "https://www.overleaf.com/docs"
@@ -78,10 +68,14 @@ export function OpenLatexInOverleaf({
     <>
       <Button
         onClick={handleOpenInOverleaf}
-        disabled={isLoading}
+        disabled={isLoading || !latexContent}
         variant={variant}
         className={className}
-        title="Open this LaTeX file in Overleaf for editing"
+        title={
+          !latexContent
+            ? "No LaTeX content available"
+            : "Open this LaTeX file in Overleaf for editing"
+        }
       >
         {isLoading ? (
           <>
@@ -91,7 +85,7 @@ export function OpenLatexInOverleaf({
         ) : (
           <>
             <ExternalLink size={16} className="mr-2" />
-            {fileName}
+            Open in Overleaf
           </>
         )}
       </Button>

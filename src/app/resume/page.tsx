@@ -218,35 +218,22 @@ export default function Home() {
               {resumeContent && resumeFilePath && (
                 <div className="p-4 border-b border-white/10">
                   <OpenLatexInOverleaf
-                    filePath={resumeFilePath}
-                    fileName="Edit in Overleaf"
+                    latexContent={tailoredContent}
                     className="bg-indigo-600 hover:bg-indigo-700"
                     variant="default"
                   />
                 </div>
               )}
               <LatexDiffViewer
-                // resumeContent
+                //
+                suggestedEdits={suggestedEdits}
                 originalContent={
-                  0 ||
-                  `%-------------------------
-% Resume in Latex
-% Author : Jake Gutierrez
-% Based off of: https://github.com/sb2nov/resume
-% License : MIT
-%------------------------
-
-`
+                  resumeContent ||
+                  `Couldn't render latex content or file is empty`
                 }
                 tailoredContent={
                   tailoredContent ||
-                  `%-------------------------
-% Resume in Latex
-% Author : Jake Gutierrez
-% Based off of: https://github.com/sb2nov/resume
-% License : 
-%------------------------
-working or not `
+                  `Couldn't render tailored latex content or file is empty, sorry :(`
                 }
               />
             </div>

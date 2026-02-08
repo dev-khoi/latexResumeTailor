@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server";
 import { applySmallEdits, scanAndSuggestEdits } from "@/ai/agents/latexTailor"
 
 export async function POST(request: NextRequest) {

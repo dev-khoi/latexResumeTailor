@@ -1,12 +1,40 @@
 import path from "path"
-import dotenv from "dotenv"
+import { playwright } from "@vitest/browser-playwright"
 import { defineConfig } from "vitest/config"
-
-dotenv.config({ path: path.resolve(__dirname, ".env.local") })
 
 export default defineConfig({
   test: {
-    environment: "node",
+    projects: [
+      {
+        test: {
+          // an example of file based convention,
+          // you don't have to follow it
+          include: [
+            "tests/unit/**/*.{test,spec}.ts",
+            "tests/**/*.unit.{test,spec}.ts",
+            "src/tests/**/*.{test,spec}.ts", // Added for src/tests directory
+          ],
+          name: "unit",
+          environment: "node",
+        },
+      },
+      {
+        test: {
+          // an example of file based convention,
+          // you don't have to follow it
+          include: [
+            "tests/browser/**/*.{test,spec}.ts",
+            "tests/**/*.browser.{test,spec}.ts",
+          ],
+          name: "browser",
+          browser: {
+            enabled: true,
+            provider: playwright(),
+            instances: [{ browser: "chromium" }],
+          },
+        },
+      },
+    ],
   },
   resolve: {
     alias: {
