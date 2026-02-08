@@ -64,8 +64,12 @@ export function ResumeList({
   }
 
   useEffect(() => {
-    loadResumes()
-    setMainResumeIdState(getMainResumeId())
+    const init = async () => {
+      await loadResumes()
+      const mainId = await getMainResumeId()
+      setMainResumeIdState(mainId)
+    }
+    init()
   }, [])
 
   const handleDelete = async (resume: Resume) => {
@@ -82,13 +86,16 @@ export function ResumeList({
     setDeletingId(null)
   }
 
-  const handleSetMain = (resumeId: string) => {
-    // Save to localStorage
-    setMainResume(resumeId)
-    setMainResumeIdState(resumeId)
-
-    // Notify parent to refresh main resume display
-    onMainResumeChange?.()
+  const handleSetMain = async (resumeId: string) => {
+    // Save to database
+    const result = await setMainResume(resumeId)
+    if (result.success) {
+      setMainResumeIdState(resumeId)
+      // Notify parent to refresh main resume display
+      onMainResumeChange?.()
+    } else {
+      setError(result.error || "Failed to set main resume")
+    }
   }
 
   const formatFileSize = (bytes: number | null) => {

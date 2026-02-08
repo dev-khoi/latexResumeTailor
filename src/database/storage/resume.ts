@@ -108,18 +108,42 @@ export async function getSignedUrl(url: string) {
   }
 }
 /**
- * Deletes a LaTeX file from storage
+ * Deletes a LaTeX file from storage and database
  * @param path - The file path to delete
  * @returns Success boolean
  */
 export async function deleteLatexFile(path: string): Promise<boolean> {
   try {
     const supabase = createClient()
-    const { error } = await supabase.storage.from("latexResume").remove([path])
+    const { data, error } = await supabase.auth.getUser()
 
-    if (error) {
-      console.error("Delete error:", error)
+    if (error || !data.user) {
+      console.error("Authentication error:", error)
       return false
+    }
+
+    const userId = data.user.id
+
+    // Delete from database first
+    const { error: dbError } = await supabase
+      .from("user_resumes")
+      .delete()
+      .eq("file_path", path)
+      .eq("user_id", userId)
+
+    if (dbError) {
+      console.error("Database delete error:", dbError)
+      return false
+    }
+
+    // Then delete from storage
+    const { error: storageError } = await supabase.storage
+      .from("latexResume")
+      .remove([path])
+
+    if (storageError) {
+      console.error("Storage delete error:", storageError)
+      // Database is already deleted, continue anyway
     }
 
     return true
@@ -194,35 +218,82 @@ export async function getResumeById(resumeId: string) {
 }
 
 /**
- * Gets the main resume from localStorage
- * @returns Main resume or null if none is set
+ * Gets the main (active) resume from database
+ * @returns Main resume or null if none exists
  */
 export async function getMainResume() {
-  const mainResumeId = localStorage.getItem("mainResumeId")
+  const supabase = createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  if (!mainResumeId) {
-    return { success: true, data: null }
+  if (!user) return { success: false, error: "Not authenticated" }
+
+  // Get the active resume, or the most recent one if none is marked active
+  const { data, error } = await supabase
+    .from("user_resumes")
+    .select("*")
+    .eq("user_id", user.id)
+    .is("deleted_at", null)
+    .order("is_active", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .single()
+
+  if (error && error.code !== "PGRST116") {
+    // PGRST116 = no rows returned
+    return { success: false, error: error.message }
   }
 
-  return await getResumeById(mainResumeId)
+  return { success: true, data: data || null }
 }
 
 /**
- * Sets a resume as the main resume in localStorage
+ * Sets a resume as the main (active) resume in database
+ * Deactivates all other resumes for this user
  * @param resumeId - The resume ID to set as main
  */
-export function setMainResume(resumeId: string | null) {
-  if (resumeId) {
-    localStorage.setItem("mainResumeId", resumeId)
-  } else {
-    localStorage.removeItem("mainResumeId")
+export async function setMainResume(resumeId: string | null) {
+  const supabase = createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) return { success: false, error: "Not authenticated" }
+
+  if (!resumeId) {
+    // Deactivate all resumes
+    const { error } = await supabase
+      .from("user_resumes")
+      .update({ is_active: false })
+      .eq("user_id", user.id)
+
+    if (error) return { success: false, error: error.message }
+    return { success: true }
   }
+
+  // First, deactivate all resumes for this user
+  await supabase
+    .from("user_resumes")
+    .update({ is_active: false })
+    .eq("user_id", user.id)
+
+  // Then activate the selected resume
+  const { error } = await supabase
+    .from("user_resumes")
+    .update({ is_active: true })
+    .eq("id", resumeId)
+    .eq("user_id", user.id)
+
+  if (error) return { success: false, error: error.message }
+  return { success: true }
 }
 
 /**
- * Gets the current main resume ID from localStorage
+ * Gets the current main resume ID from database
  * @returns Main resume ID or null
  */
-export function getMainResumeId(): string | null {
-  return localStorage.getItem("mainResumeId")
+export async function getMainResumeId(): Promise<string | null> {
+  const result = await getMainResume()
+  return result.success && result.data ? result.data.id : null
 }

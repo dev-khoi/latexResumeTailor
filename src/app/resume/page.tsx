@@ -1,110 +1,222 @@
 "use client"
 
 import { useState } from "react"
-import { getLatexFileUrl, getSignedUrl } from "@/database/storage/resume"
+import type { ResumeEdit } from "@/ai/agents/latexTailor"
+import { Resume, getLatexFileUrl } from "@/database/storage/resume"
+import { Sparkles } from "lucide-react"
 
-import { compileAndPreviewPdf } from "@/lib/latexCompiler"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { LatexEditor } from "@/components/latexComponent/editor/latexEditor"
-import UploadResumeButton from "@/components/latexComponent/inputFile"
-import ResumeList from "@/components/latexComponent/latexVersion/latexVersionRetrieval"
-import ResumeListButton from "@/components/latexComponent/latexVersion/latexVersionRetrieval"
+import { LatexDiffViewer } from "@/components/latexComponent/editor/latexDiffViewer"
 import MainLatexButton from "@/components/latexComponent/mainLatexButton"
 
 export default function Home() {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [resumeContent, setResumeContent] = useState<string | null>(null)
+  const [tailoredContent, setTailoredContent] = useState<string | null>(null)
+  const [jobUrl, setJobUrl] = useState<string>("")
+  const [keywords, setKeywords] = useState<string[]>([])
+  const [suggestedEdits, setSuggestedEdits] = useState<ResumeEdit[]>([])
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [error, setError] = useState<string>("")
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      setSelectedFile(file)
+  const handleResumeChange = () => {
+    // Reset content when resume changes
+    setResumeContent(null)
+    setTailoredContent(null)
+    setSuggestedEdits([])
+    setKeywords([])
+    setError("")
+  }
+
+  // Fetch the latex file content
+  const handleResumeLoad = async (resume: Resume) => {
+    const url = await getLatexFileUrl(resume.file_path)
+    if (url) {
+      const response = await fetch(url)
+      const text = await response.text()
+      setResumeContent(text)
+      setTailoredContent(null)
+      setSuggestedEdits([])
+      setKeywords([])
     }
   }
 
-  const handleCompileLatex = async () => {
-    if (!selectedFile) {
-      alert("Please select a .tex file first")
+  // Tailor resume based on job posting
+  const handleTailorResume = async () => {
+    if (!resumeContent) {
+      setError("Please load a resume first")
       return
     }
 
-    try {
-      // Send to API route
-      const formData = new FormData()
-      formData.append("file", selectedFile)
+    if (!jobUrl) {
+      setError("Please enter a job posting URL")
+      return
+    }
 
-      const apiResponse = await fetch("/api/latexCompiler", {
+    setIsProcessing(true)
+    setError("")
+
+    try {
+      // Step 1: Extract job description from URL via API
+      const extractResponse = await fetch("/api/extract-job", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: jobUrl }),
       })
 
-      if (!apiResponse.ok) {
-        const errorData = await apiResponse.json()
-        alert(`Error: ${errorData.error}`)
-        return
+      if (!extractResponse.ok) {
+        const errorData = await extractResponse.json()
+        throw new Error(errorData.error || "Failed to extract job posting")
       }
 
-      // Get PDF blob and open in new tab
-      const pdfBlob = await apiResponse.blob()
-      const pdfUrl = URL.createObjectURL(pdfBlob)
-      window.open(pdfUrl, "_blank")
-    } catch (error) {
-      console.error("Error:", error)
-      alert(
-        `Failed to compile: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      )
+      const { html: jobDescription } = await extractResponse.json()
+
+      // Step 2: Tailor resume via API
+      const tailorResponse = await fetch("/api/tailor-resume", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          latexContent: resumeContent,
+          jobDescription,
+        }),
+      })
+
+      if (!tailorResponse.ok) {
+        const errorData = await tailorResponse.json()
+        throw new Error(errorData.error || "Failed to tailor resume")
+      }
+
+      const { edits, keywords, tailoredContent } = await tailorResponse.json()
+
+      // Store results
+      setSuggestedEdits(edits)
+      setKeywords(keywords)
+      setTailoredContent(tailoredContent)
+    } catch (err) {
+      console.error("Error tailoring resume:", err)
+      setError(err instanceof Error ? err.message : "Failed to tailor resume")
+    } finally {
+      setIsProcessing(false)
     }
   }
 
   return (
     <div className="relative flex justify-center bg-slate-950 px-4 py-10 lg:items-center">
-      <div className="flex w-full  max-w-8xl flex-col gap-8 lg:flex-row px-20 items-stretch">
-        {/* aside */}
-        <aside className="flex h-full min-h-[600px] items-center w-72 flex-col gap-10 rounded-3xl border border-white/10 bg-slate-900/80 p-6 text-white shadow-2xl shadow-slate-950/60 backdrop-blur">
+      <div className="flex w-full max-w-[1800px] flex-col gap-8 lg:flex-row px-8 items-stretch">
+        {/* Sidebar with Job URL and Controls */}
+        <aside className="flex h-full min-h-[600px] items-start w-80 flex-col gap-6 rounded-3xl border border-white/10 bg-slate-900/80 p-6 text-white shadow-2xl shadow-slate-950/60 backdrop-blur">
           <div className="space-y-2">
-            <h4 className="text-lg font-semibold">Job Posting URL</h4>
+            <h4 className="text-lg font-semibold">AI Resume Tailoring</h4>
             <p className="text-sm text-slate-400">
-              Paste the job posting link, then upload your resume.
+              Upload your resume and enter a job URL to get AI-optimized version
             </p>
-            <input
-              type="url"
-              placeholder="https://company.com/job/role"
-              className="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
-            />
           </div>
 
-          {/* <div className="pt-2">
-            <UploadResumeButton />
-          </div> */}
-          <MainLatexButton />
-        </aside>
-        {/* main bar */}
-        {/* <Button
-        // onClick={async () => {
-        //   const signedUrl = await getSignedUrl(
-        //     "551495a0-7848-4cbc-a118-8a85c1e86e08/example_1770258914855.tex"
-        //   )
-
-        //   window.location.href = signedUrl
-        // }}
-        ></Button> */}
-
-        <div className="flex gap-2 items-center">
-          <Input
-            type="file"
-            accept=".tex"
-            onChange={handleFileChange}
-            className="max-w-xs text-white"
+          <MainLatexButton
+            onResumeChange={handleResumeChange}
+            onResumeLoad={handleResumeLoad}
           />
-          <Button onClick={handleCompileLatex} disabled={!selectedFile}>
-            Compile & Preview PDF
-          </Button>
-        </div>
 
-        <section className="flex-1 min-h-[600px] rounded-3xl border border-white/10 bg-white/5 shadow-2xl shadow-slate-950/60 backdrop-blur overflow-hidden p-6">
-          <LatexEditor />
+          <div className="w-full border-t border-slate-700 pt-4 space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-300">
+                Job Posting URL
+              </label>
+              <input
+                type="url"
+                placeholder="https://company.com/job/role"
+                value={jobUrl}
+                onChange={(e) => setJobUrl(e.target.value)}
+                className="w-full rounded-lg border border-slate-600 bg-slate-900/70 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+
+            <Button
+              onClick={handleTailorResume}
+              disabled={!resumeContent || !jobUrl || isProcessing}
+              className="w-full bg-blue-600 hover:bg-blue-700"
+            >
+              {isProcessing ? (
+                <span className="animate-pulse">Processing...</span>
+              ) : (
+                <>
+                  <Sparkles size={16} className="mr-2" />
+                  Tailor with AI
+                </>
+              )}
+            </Button>
+
+            {error && (
+              <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400">
+                {error}
+              </div>
+            )}
+
+            {keywords.length > 0 && (
+              <div className="space-y-2">
+                <h5 className="text-sm font-semibold text-slate-300">
+                  Extracted Keywords ({keywords.length})
+                </h5>
+                <div className="flex flex-wrap gap-1 max-h-32 overflow-y-auto">
+                  {keywords.map((keyword, idx) => (
+                    <span
+                      key={idx}
+                      className="rounded-md bg-blue-500/10 border border-blue-500/20 px-2 py-1 text-xs text-blue-400"
+                    >
+                      {keyword}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {suggestedEdits.length > 0 && (
+              <div className="space-y-2">
+                <h5 className="text-sm font-semibold text-slate-300">
+                  Suggested Changes ({suggestedEdits.length})
+                </h5>
+                <div className="max-h-48 overflow-y-auto space-y-2">
+                  {suggestedEdits.map((edit, idx) => (
+                    <div
+                      key={idx}
+                      className="rounded-md bg-slate-700/50 border border-slate-600 p-2"
+                    >
+                      <p className="text-slate-300 text-xs italic mb-1">
+                        {edit.reason}
+                      </p>
+                      <div className="text-xs">
+                        <span className="text-red-400">- {edit.original}</span>
+                        <br />
+                        <span className="text-green-400">+ {edit.updated}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </aside>
+
+        {/* Main Diff View */}
+        <section className="flex-1 min-h-[600px] rounded-3xl border border-white/10 bg-white/5 shadow-2xl shadow-slate-950/60 backdrop-blur overflow-hidden">
+          <div className="h-full flex flex-col">
+            <div className="bg-slate-800/50 border-b border-white/10 px-6 py-3 flex items-center justify-between">
+              <h3 className="text-white font-semibold">
+                Resume Comparison: Original ↔ AI-Tailored
+              </h3>
+              {tailoredContent && (
+                <span className="text-xs text-green-400 flex items-center gap-1">
+                  <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                  Changes Applied
+                </span>
+              )}
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <LatexDiffViewer
+                originalContent={resumeContent || ""}
+                tailoredContent={tailoredContent || ""}
+              />
+            </div>
+          </div>
         </section>
       </div>
     </div>

@@ -1,15 +1,18 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import {
   deleteLatexFile,
+  getAllUserLatexFiles,
   getLatexFileUrl,
   getMainResume,
   setMainResume as setMainResumeInStorage,
+  uploadLatexFile,
   type Resume,
 } from "@/database/storage/resume"
-import { Download, FileText, Loader2, Trash2, X } from "lucide-react"
+import { Download, FileText, Loader2, Trash2, Upload, X } from "lucide-react"
 
+import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -19,17 +22,24 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 
+import { ConfirmRemovalDialog } from "./confirmRemoval"
 import { ViewResumeButton } from "./latexVersion/viewResume"
 
 export function MainResumeDisplay({
   onResumeChange,
+  onResumeLoad,
 }: {
   onResumeChange?: () => void
+  onResumeLoad?: (resume: Resume) => void
 }) {
   const [mainResume, setMainResume] = useState<Resume | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string>("")
   const [deleting, setDeleting] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const loadMainResume = async () => {
     setLoading(true)
@@ -37,6 +47,10 @@ export function MainResumeDisplay({
     const result = await getMainResume()
     if (result.success) {
       setMainResume(result.data)
+      // Load the latex file content if resume exists
+      if (result.data && onResumeLoad) {
+        onResumeLoad(result.data)
+      }
     } else {
       setError(result.error || "Failed to load main resume")
     }
@@ -57,22 +71,111 @@ export function MainResumeDisplay({
     }
   }
 
-  const handleDelete = async () => {
+  const handleDeleteClick = () => {
+    setShowDeleteDialog(true)
+  }
+
+  const handleConfirmDelete = async () => {
     if (!mainResume) return
-    if (!confirm(`Delete "${mainResume.original_file_name}"?`)) return
 
     setDeleting(true)
     const success = await deleteLatexFile(mainResume.file_path)
 
     if (success) {
-      // Clear from localStorage
-      setMainResumeInStorage(null)
+      // Database will handle deactivation
       setMainResume(null)
+      setShowDeleteDialog(false)
       onResumeChange?.()
     } else {
       setError("Failed to delete file")
+      setShowDeleteDialog(false)
     }
     setDeleting(false)
+  }
+
+  const handleFileUpload = async (file: File) => {
+    setError("")
+
+    // File validation
+    const validExtensions = [".tex", ".latex"]
+    const fileName = file.name.toLowerCase()
+    const hasValidExtension = validExtensions.some((ext) =>
+      fileName.endsWith(ext)
+    )
+
+    if (!hasValidExtension) {
+      setError("Please upload a valid LaTeX file (.tex or .latex)")
+      return
+    }
+
+    // Check file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024
+    if (file.size > maxSize) {
+      setError("File size must be less than 5MB")
+      return
+    }
+
+    setUploading(true)
+
+    try {
+      const supabase = createClient()
+      const { data } = await supabase.auth.getUser()
+      const userId = data.user?.id
+
+      const result = await uploadLatexFile(file, userId)
+
+      if (result.success && result.data) {
+        // Get all resumes and set the latest one as main
+        const resumesResult = await getAllUserLatexFiles()
+        if (
+          resumesResult.success &&
+          resumesResult.data &&
+          resumesResult.data.length > 0
+        ) {
+          const latestResume = resumesResult.data[0]
+          await setMainResumeInStorage(latestResume.id)
+        }
+        await loadMainResume()
+        if (onResumeChange) {
+          onResumeChange()
+        }
+      } else {
+        setError(result.error || "Upload failed")
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "An unexpected error occurred"
+      )
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+
+    const file = e.dataTransfer.files?.[0]
+    if (file) {
+      handleFileUpload(file)
+    }
+  }
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+  }
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      handleFileUpload(file)
+    }
   }
 
   const formatFileSize = (bytes: number | null) => {
@@ -109,7 +212,7 @@ export function MainResumeDisplay({
   return (
     <>
       <CardHeader className="py-2">
-        <CardTitle className="text-base">Based Resume</CardTitle>
+        <CardTitle className="text-base">Based Latex Resume</CardTitle>
       </CardHeader>
       <Card className=" w-60 h-70 !mt-0 !pb-0">
         <CardContent className="space-y-3 !py-6 !pb-6 flex flex-col">
@@ -120,21 +223,49 @@ export function MainResumeDisplay({
           )}
 
           {!mainResume ? (
-            <div className="text-center py-4 text-muted-foreground">
-              <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p className="text-sm font-medium">No resume selected</p>
-              <p className="text-xs mt-1">Upload or select a file</p>
+            <div
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onClick={() => fileInputRef.current?.click()}
+              className={`cursor-pointer text-center py-8 px-4 border-2 border-dashed rounded-lg transition-colors ${
+                isDragging
+                  ? "border-primary bg-primary/5"
+                  : "border-muted-foreground/25 hover:border-primary/50 hover:bg-accent/50"
+              }`}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".tex,.latex"
+                onChange={handleFileInputChange}
+                className="hidden"
+                disabled={uploading}
+              />
+              {uploading ? (
+                <>
+                  <Loader2 className="h-8 w-8 mx-auto mb-2 animate-spin text-primary" />
+                  <p className="text-sm font-medium">Uploading...</p>
+                </>
+              ) : (
+                <>
+                  <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-sm font-medium">
+                    Upload your latex Resume
+                  </p>
+                  <p className="text-xs mt-1 text-muted-foreground">
+                    Click or drag & drop your .tex file
+                  </p>
+                </>
+              )}
             </div>
           ) : (
             <>
               <Button
                 variant="destructive"
                 size="sm"
-                onClick={() => {
-                  setMainResumeInStorage(null)
-                  setMainResume(null)
-                  onResumeChange?.()
-                }}
+                onClick={handleDeleteClick}
+                disabled={deleting}
                 className="text-xs size-2 absolute self-end"
               >
                 <X className="h-3 w-3" />
@@ -165,6 +296,14 @@ export function MainResumeDisplay({
           )}
         </CardContent>
       </Card>
+
+      <ConfirmRemovalDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        resume={mainResume}
+        onConfirm={handleConfirmDelete}
+        isDeleting={deleting}
+      />
     </>
   )
 }

@@ -1,8 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import type { ResumeEdit } from "@/ai/agents/latexTailor"
 import Editor, { Monaco } from "@monaco-editor/react"
-import { Bold, Italic } from "lucide-react"
+import { Bold, Italic, Sparkles } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
 
 const defaultLatexTemplate = `\\documentclass[11pt,a4paper]{article}
 \\usepackage[utf8]{inputenc}
@@ -35,11 +38,101 @@ Bachelor of Science in Computer Science \\hfill Expected Graduation: May 2024
 \\end{document}
 `
 
-export function LatexEditor() {
-  const [latexContent, setLatexContent] = useState(defaultLatexTemplate)
+export function LatexEditor({
+  initialContent,
+  enableAITailoring = false,
+}: {
+  initialContent?: string
+  enableAITailoring?: boolean
+}) {
+  const [latexContent, setLatexContent] = useState(
+    initialContent || defaultLatexTemplate
+  )
   const [editorInstance, setEditorInstance] = useState<any>(null)
   const [isBoldActive, setIsBoldActive] = useState(false)
   const [isItalicActive, setIsItalicActive] = useState(false)
+
+  // AI Tailoring states
+  const [jobUrl, setJobUrl] = useState<string>("")
+  const [keywords, setKeywords] = useState<string[]>([])
+  const [suggestedEdits, setSuggestedEdits] = useState<ResumeEdit[]>([])
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [error, setError] = useState<string>("")
+
+  // Update content when initialContent prop changes
+  useEffect(() => {
+    if (initialContent) {
+      setLatexContent(initialContent)
+    }
+  }, [initialContent])
+
+  // Tailor resume based on job posting
+  const handleTailorResume = async () => {
+    if (!initialContent) {
+      setError("Please load a resume first")
+      return
+    }
+
+    if (!jobUrl) {
+      setError("Please enter a job posting URL")
+      return
+    }
+
+    setIsProcessing(true)
+    setError("")
+
+    try {
+      // Step 1: Extract job description from URL via API
+      const extractResponse = await fetch("/api/extract-job", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: jobUrl }),
+      })
+
+      if (!extractResponse.ok) {
+        const errorData = await extractResponse.json()
+        throw new Error(errorData.error || "Failed to extract job posting")
+      }
+
+      const { html: jobDescription } = await extractResponse.json()
+
+      //   Step 2: html resume via API
+      const tailorResponse = await fetch("/api/tailor-resume", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          latexContent: initialContent,
+          jobDescription,
+        }),
+      })
+
+      if (!tailorResponse.ok) {
+        const errorData = await tailorResponse.json()
+        throw new Error(errorData.error || "Failed to tailor resume")
+      }
+
+      const { edits, keywords, tailoredContent } = await tailorResponse.json()
+
+      // Store results
+      setSuggestedEdits(edits)
+      setKeywords(keywords)
+      setLatexContent(tailoredContent)
+    } catch (err) {
+      console.error("Error tailoring resume:", err)
+      setError(err instanceof Error ? err.message : "Failed to tailor resume")
+    } finally {
+      setIsProcessing(false)
+    }
+  }
+
+  // If no initial content, show upload message
+  if (!initialContent) {
+    return (
+      <div className="h-full w-full text-center py-8 px-4 border-2 border-collapse rounded-lg transition-colors flex flex-col items-center justify-center m-auto">
+        <p className="text-gray-500 text-lg">Upload LaTeX resume to show</p>
+      </div>
+    )
+  }
 
   const insertText = (
     before: string,
@@ -122,6 +215,86 @@ export function LatexEditor() {
 
   return (
     <div className="h-full w-full border rounded-md overflow-hidden flex flex-col">
+      {/* AI Tailoring Section - Only show if enabled */}
+      {enableAITailoring && initialContent && (
+        <div className="flex-shrink-0 bg-slate-800 border-b border-slate-700 p-4 space-y-3">
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-slate-300">
+              Job Posting URL
+            </label>
+            <input
+              type="url"
+              placeholder="https://company.com/job/role"
+              value={jobUrl}
+              onChange={(e) => setJobUrl(e.target.value)}
+              className="w-full rounded-lg border border-slate-600 bg-slate-900/70 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+
+          <Button
+            onClick={handleTailorResume}
+            disabled={!jobUrl || isProcessing}
+            className="w-full bg-blue-600 hover:bg-blue-700"
+            size="sm"
+          >
+            {isProcessing ? (
+              <>
+                <span className="animate-pulse">Processing...</span>
+              </>
+            ) : (
+              <>
+                <Sparkles size={16} className="mr-2" />
+                Tailor with AI
+              </>
+            )}
+          </Button>
+
+          {error && (
+            <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-2 text-xs text-red-400">
+              {error}
+            </div>
+          )}
+
+          {keywords.length > 0 && (
+            <div className="space-y-2">
+              <h5 className="text-xs font-semibold text-slate-300">
+                Extracted Keywords ({keywords.length})
+              </h5>
+              <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
+                {keywords.map((keyword, idx) => (
+                  <span
+                    key={idx}
+                    className="rounded-md bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 text-xs text-blue-400"
+                  >
+                    {keyword}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {suggestedEdits.length > 0 && (
+            <div className="space-y-2">
+              <h5 className="text-xs font-semibold text-slate-300">
+                Suggested Changes ({suggestedEdits.length})
+              </h5>
+              <div className="max-h-32 overflow-y-auto space-y-1">
+                {suggestedEdits.map((edit, idx) => (
+                  <div
+                    key={idx}
+                    className="rounded-md bg-slate-700/50 border border-slate-600 p-2"
+                  >
+                    <p className="text-slate-300 text-xs italic">
+                      {edit.reason}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Toolbar */}
       <div className="flex items-center gap-2 border-b bg-white p-2 flex-shrink-0">
         {/* Text Type Dropdown */}

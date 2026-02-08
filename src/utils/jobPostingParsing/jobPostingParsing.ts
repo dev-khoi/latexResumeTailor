@@ -86,9 +86,7 @@ const extractHTMLFromUrl = async (url: string): Promise<string | null> => {
       return main ? main.innerHTML : document.body.innerHTML;
     });
 
-    console.log(bodyHtml);
     await browser.close();
-    await fs.writeFile("result.md", bodyHtml, "utf-8");
 
     return bodyHtml;
   } catch (error) {
