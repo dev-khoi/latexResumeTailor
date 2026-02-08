@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Resume } from "@/database/storage/resume"
 
-import { MainResumeDisplay } from "./mainResumeDisplay"
+import { MainResumeDisplay } from "./mainLatexDisplay"
 
 export default function MainLatexButton({
   onResumeChange,
@@ -23,7 +23,7 @@ export default function MainLatexButton({
   }
 
   return (
-    <div className="space-y-6">
+    <div>
       {/* Main Resume Display with Upload */}
       <MainResumeDisplay
         key={refreshKey}

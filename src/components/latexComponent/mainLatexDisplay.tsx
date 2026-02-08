@@ -23,7 +23,6 @@ import {
 } from "@/components/ui/card"
 
 import { ConfirmRemovalDialog } from "./confirmRemoval"
-import { ViewResumeButton } from "./latexVersion/viewResume"
 
 export function MainResumeDisplay({
   onResumeChange,

@@ -7,6 +7,7 @@ import { Sparkles } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { LatexDiffViewer } from "@/components/latexComponent/editor/latexDiffViewer"
+import OpenLatexInOverleaf from "@/components/latexComponent/editor/openLatexInOverleaf"
 import MainLatexButton from "@/components/latexComponent/mainLatexButton"
 
 export default function Home() {
@@ -17,6 +18,7 @@ export default function Home() {
   const [suggestedEdits, setSuggestedEdits] = useState<ResumeEdit[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string>("")
+  const [resumeFilePath, setResumeFilePath] = useState<string>("")
 
   const handleResumeChange = () => {
     // Reset content when resume changes
@@ -25,6 +27,7 @@ export default function Home() {
     setSuggestedEdits([])
     setKeywords([])
     setError("")
+    setResumeFilePath("")
   }
 
   // Fetch the latex file content
@@ -34,6 +37,7 @@ export default function Home() {
       const response = await fetch(url)
       const text = await response.text()
       setResumeContent(text)
+      setResumeFilePath(resume.file_path)
       setTailoredContent(null)
       setSuggestedEdits([])
       setKeywords([])
@@ -210,10 +214,40 @@ export default function Home() {
                 </span>
               )}
             </div>
-            <div className="flex-1 overflow-hidden">
+            <div className="flex-1 flex flex-col">
+              {resumeContent && resumeFilePath && (
+                <div className="p-4 border-b border-white/10">
+                  <OpenLatexInOverleaf
+                    filePath={resumeFilePath}
+                    fileName="Edit in Overleaf"
+                    className="bg-indigo-600 hover:bg-indigo-700"
+                    variant="default"
+                  />
+                </div>
+              )}
               <LatexDiffViewer
-                originalContent={resumeContent || ""}
-                tailoredContent={tailoredContent || ""}
+                // resumeContent
+                originalContent={
+                  0 ||
+                  `%-------------------------
+% Resume in Latex
+% Author : Jake Gutierrez
+% Based off of: https://github.com/sb2nov/resume
+% License : MIT
+%------------------------
+
+`
+                }
+                tailoredContent={
+                  tailoredContent ||
+                  `%-------------------------
+% Resume in Latex
+% Author : Jake Gutierrez
+% Based off of: https://github.com/sb2nov/resume
+% License : 
+%------------------------
+working or not `
+                }
               />
             </div>
           </div>

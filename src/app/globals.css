@@ -91,6 +91,31 @@
     --ring: 216 34% 17%;
 
     --radius: 0.5rem;
+
+    --diff-text-color: #111111; /* slate-200 */
+    --diff-code-insert-text-color: #0a5842; /* emerald-800 */
+    --diff-code-delete-text-color: #661111; /* red-900 */
+
+    --diff-gutter-insert-text-color: #063f30;
+    --diff-gutter-delete-text-color: #7f1d1d;
+
+    --diff-background-color: initial;
+    --diff-font-family: Consolas, Courier, monospace;
+    --diff-selection-background-color: #b3d7ff;
+    --diff-selection-text-color: var(--diff-text-color);
+    --diff-gutter-insert-background-color: #d6fedb;
+    --diff-gutter-delete-background-color: #fadde0;
+    --diff-gutter-selected-background-color: #fffce0;
+    --diff-gutter-selected-text-color: var(--diff-text-color);
+    --diff-code-insert-background-color: #eaffee;
+    --diff-code-delete-background-color: #fdeff0;
+    --diff-code-insert-edit-background-color: #c0dc91;
+    --diff-code-insert-edit-text-color: var(--diff-text-color);
+    --diff-code-delete-edit-background-color: #f39ea2;
+    --diff-code-delete-edit-text-color: var(--diff-text-color);
+    --diff-code-selected-background-color: #fffce0;
+    --diff-code-selected-text-color: var(--diff-text-color);
+    --diff-omit-gutter-line-color: #cb2a1d;
   }
 }
 

@@ -1,3 +1,4 @@
+import "react-diff-view/style/index.css"
 import "./globals.css"
 import { Metadata } from "next"
 

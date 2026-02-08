@@ -3,14 +3,13 @@
 import { useMemo } from "react"
 import { Diff, Hunk, parseDiff } from "react-diff-view"
 
-import "react-diff-view/style/index.css"
+// import "react-diff-view/style/index.css"
 
 interface LatexDiffViewerProps {
   originalContent: string
   tailoredContent: string
 }
 
-// Simple diff function to create unified diff format
 function createUnifiedDiff(
   original: string,
   tailored: string,
@@ -20,41 +19,34 @@ function createUnifiedDiff(
   const originalLines = original.split("\n")
   const tailoredLines = tailored.split("\n")
 
-  // Simple Myers diff algorithm
   const diff = computeDiff(originalLines, tailoredLines)
 
-  // Build unified diff format
-  let result = `--- ${originalName}\n+++ ${tailoredName}\n`
-
-  let oldLineNum = 1
-  let newLineNum = 1
-  let hunkStart = 0
-  let hunkLines: string[] = []
+  const hunkLines: string[] = []
+  let oldCount = 0
+  let newCount = 0
 
   for (const [type, line] of diff) {
     if (type === "delete") {
       hunkLines.push(`-${line}`)
-      oldLineNum++
+      oldCount++
     } else if (type === "insert") {
       hunkLines.push(`+${line}`)
-      newLineNum++
+      newCount++
     } else {
       hunkLines.push(` ${line}`)
-      oldLineNum++
-      newLineNum++
+      oldCount++
+      newCount++
     }
   }
 
-  if (hunkLines.length > 0) {
-    result += `@@ -${Math.max(1, oldLineNum - hunkLines.length)},${
-      hunkLines.length
-    } +${Math.max(1, newLineNum - hunkLines.length)},${hunkLines.length} @@\n`
-    result += hunkLines.join("\n")
-  }
-
-  return result
+  return [
+    `diff --git a/${originalName} b/${tailoredName}`,
+    `--- a/${originalName}`,
+    `+++ b/${tailoredName}`,
+    `@@ -1,${oldCount} +1,${newCount} @@`,
+    ...hunkLines,
+  ].join("\n")
 }
-
 // Simple diff algorithm
 function computeDiff(
   original: string[],
@@ -157,9 +149,7 @@ export function LatexDiffViewer({
           optimizeSelection
         >
           {(hunks) =>
-            hunks.map((hunk) => (
-              <Hunk key={hunk.content} hunk={hunk}  />
-            ))
+            hunks.map((hunk) => <Hunk key={hunk.content} hunk={hunk} />)
           }
         </Diff>
       ))}
