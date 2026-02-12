@@ -1,6 +1,8 @@
 import path from "path"
-import { playwright } from "@vitest/browser-playwright"
+import { fileURLToPath } from "url"
 import { defineConfig } from "vitest/config"
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
   test: {
@@ -18,27 +20,9 @@ export default defineConfig({
           environment: "node",
         },
       },
-      {
-        test: {
-          // an example of file based convention,
-          // you don't have to follow it
-          include: [
-            "tests/browser/**/*.{test,spec}.ts",
-            "tests/**/*.browser.{test,spec}.ts",
-          ],
-          name: "browser",
-          browser: {
-            enabled: true,
-            provider: playwright(),
-            instances: [{ browser: "chromium" }],
-          },
-        },
-      },
     ],
   },
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "src"),
-    },
+    alias: [{ find: "@", replacement: path.resolve("src") }],
   },
 })

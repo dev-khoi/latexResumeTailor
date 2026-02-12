@@ -1,5 +1,9 @@
-import { applySmallEdits, scanAndSuggestEdits } from "@/ai/agents/latexTailor"
+import dotenv from "dotenv"
 import { describe, expect, it } from "vitest"
+
+import { applySmallEdits, scanAndSuggestEdits } from "../ai/agents/latexTailor"
+
+dotenv.config()
 
 describe("Resume Tailor Agent", () => {
   const sampleLatex = `\\documentclass{article}
@@ -46,13 +50,29 @@ describe("Resume Tailor Agent", () => {
       },
     ]
 
-
     const result = await applySmallEdits(sampleLatex, edits)
-
-
 
     expect(result).toContain("React and TypeScript")
     expect(result).toContain("Agile environment")
     expect(result).not.toContain("Worked with team members")
   })
+
+  it("should throw error for too short job description", async () => {
+    await expect(scanAndSuggestEdits(sampleLatex, "Job")).rejects.toThrow(
+      /Invalid job description/
+    )
+  }, 30000)
+
+  it("should throw error for too short resume", async () => {
+    await expect(
+      scanAndSuggestEdits("\\item test", sampleJobDescription)
+    ).rejects.toThrow(/Invalid resume/)
+  }, 30000)
+
+  it("should throw error for non-LaTeX resume", async () => {
+    const plainText = "This is just plain text, not LaTeX at all"
+    await expect(
+      scanAndSuggestEdits(plainText, sampleJobDescription)
+    ).rejects.toThrow(/Invalid resume/)
+  }, 30000)
 })

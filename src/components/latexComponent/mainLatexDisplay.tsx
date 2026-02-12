@@ -210,11 +210,11 @@ export function MainResumeDisplay({
 
   return (
     <>
-      <CardHeader className="py-2">
-        <CardTitle className="text-base">Based Latex Resume</CardTitle>
+      <CardHeader className="py-2 px-0">
+        <CardTitle className="text-base !pl-0">Based Latex Resume</CardTitle>
       </CardHeader>
-      <Card className=" w-60 h-70 !mt-0 !pb-0">
-        <CardContent className="space-y-3 !py-6 !pb-6 flex flex-col">
+      <Card className=" w-60 h-70 !mt-0 !pb-0 mx-auto">
+        <CardContent className="space-y-3 !py-6 !pb-6 flex flex-col ">
           {error && (
             <div className="rounded-md bg-red-50 dark:bg-red-950 p-2 text-xs text-red-600 dark:text-red-400">
               {error}

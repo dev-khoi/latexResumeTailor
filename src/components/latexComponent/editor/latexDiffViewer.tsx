@@ -4,10 +4,6 @@ import { useMemo } from "react"
 import { ResumeEdit } from "@/ai/agents/latexTailor"
 import { Info } from "lucide-react"
 import { Diff, Hunk, getChangeKey, parseDiff, tokenize } from "react-diff-view"
-import refractor from 'refractor/core'
-import latex from 'refractor/lang/latex'
-
-refractor.register(latex)
 
 interface LatexDiffViewerProps {
   suggestedEdits: ResumeEdit[]
@@ -189,29 +185,20 @@ export function LatexDiffViewer({
 
   return (
     <div className="h-full w-full overflow-auto bg-white dark:bg-slate-900">
-      {files.map((file, index) => {
-        const tokens = tokenize(file.hunks, {
-          highlight: true,
-          language: "latex",
-          refractor: Prism as any,
-        })
-
-        return (
-          <Diff
-            key={index}
-            viewType="split"
-            diffType={file.type}
-            hunks={file.hunks}
-            tokens={tokens}
-            widgets={widgets}
-            optimizeSelection
-          >
-            {(hunks) =>
-              hunks.map((hunk) => <Hunk key={hunk.content} hunk={hunk} />)
-            }
-          </Diff>
-        )
-      })}
+      {files.map((file, index) => (
+        <Diff
+          key={index}
+          viewType="split"
+          diffType={file.type}
+          hunks={file.hunks}
+          widgets={widgets}
+          optimizeSelection
+        >
+          {(hunks) =>
+            hunks.map((hunk) => <Hunk key={hunk.content} hunk={hunk} />)
+          }
+        </Diff>
+      ))}
     </div>
   )
 }
