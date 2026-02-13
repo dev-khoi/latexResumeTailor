@@ -5,11 +5,13 @@ import systemPrompt from "../prompts/resumeTailorPrompt"
 
 // Zod schema for individual edit
 const ResumeEditSchema = z.object({
-  reason: z.string().describe("describing why this part has changed"),
+  reason: z
+    .string()
+    .describe("describing why this part has changed or what can be suggested"),
   original: z
     .string()
     .describe("The exact original LaTeX content to be replaced"),
-  updated: z.string().describe("The improved LaTeX content"),
+  updated: z.string().default("").describe("The improved LaTeX content"),
 })
 
 // Zod schema for the response
@@ -35,17 +37,11 @@ export async function scanAndSuggestEdits(
   latexContent: string,
   jobDescription: string
 ) {
-  // Truncate job description to first 4000 characters to avoid token limits
-  const truncatedJobDescription = jobDescription.substring(0, 4000)
-
-  // Truncate resume to first 5000 characters to keep payload reasonable
-  const truncatedResume = latexContent.substring(0, 5000)
-
   const prompt = `
-  JOB DESCRIPTION: \`\`\`${truncatedJobDescription}\`\`\`
+  JOB DESCRIPTION: \`\`\`${jobDescription}\`\`\`
 ---
 LATEX RESUME:
-\`\`\`${truncatedResume}\`\`\`
+\`\`\`${latexContent}\`\`\`
 ---
 Instructions:
 1. Extract the most important ATS keywords from the job description above
@@ -54,7 +50,7 @@ Instructions:
 4. Return the keywords array and edits array as specified in the schema`
 
   const result = await generateText({
-    model: "deepseek/deepseek-v3.2",
+    model: "google/gemini-2.0-flash",
     system: systemPrompt,
     prompt: prompt,
     output: Output.object({
@@ -74,8 +70,16 @@ Instructions:
   if (parsed.data.validationError) {
     throw new Error(parsed.data.validationError)
   }
+  const edits = parsed.data.edits.map((e) => ({
+    ...e,
+    updated: e.updated ?? e.original,
+  }))
 
-  return parsed.data
+  return {
+    validationError: parsed.data.validationError,
+    keywords: parsed.data.keywords,
+    edits,
+  }
 }
 
 export async function applySmallEdits(

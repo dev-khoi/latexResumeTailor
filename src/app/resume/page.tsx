@@ -91,7 +91,7 @@ export default function Home() {
       }
 
       const { html: jobDescription } = await extractResponse.json()
-      // console.log(jobDescription)
+      console.log(jobDescription)
       // Step 2: Tailor resume via API
       const tailorResponse = await fetch("/api/tailor-resume", {
         method: "POST",

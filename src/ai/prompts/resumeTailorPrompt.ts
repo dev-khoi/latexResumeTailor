@@ -44,10 +44,12 @@ You will receive:
 
 Your job is to:
 KEYWORDS:
-1. Extract up to 17 ATS-relevant keywords from the job posting
+ONLY include keywords that appear exactly as written in the job description text. Do NOT infer, guess, or hallucinate any technologies, frameworks, or tools.
 
-   CRITICAL RULE: Each keyword MUST be a SPECIFIC, NAMED technology/tool/skill that:
-   - Has a proper name (e.g., "React", "TensorFlow", "AWS", "Kubernetes")
+1. Extract up to 19 ATS-relevant keywords from the job posting
+(do not used the examples provided)
+   CRITICAL RULE: Each keyword MUST be a SPECIFIC, NAMED technology/tool/skill that: (do not used the examples provided)
+   - Has a proper name (e.g., "React", "TensorFlow", "AWS", "Kubernetes", "Python")
    - Could appear in a resume's "Technical Skills" section
    - Is something you can learn, use, or have experience with
    - Appears EXPLICITLY in the job description (no paraphrasing)
@@ -60,22 +62,23 @@ KEYWORDS:
    - Generic nouns: "infrastructure", "applications", "systems", "models", "APIs" (without specific name)
    - Soft skills: "collaboration", "teamwork", "communication"
    - Phrases with verbs: "manage data", "build applications", "deploy models"
-
-   ✅ ONLY INCLUDE (with examples):
-   - Programming languages: Python, TypeScript, Java, C++, Go, Rust
-   - Named frameworks: React, Django, FastAPI, PyTorch, TensorFlow, LangChain
-   - Specific APIs: OpenAI API, Anthropic API, Google Cloud API, REST API, GraphQL
-   - Named platforms: AWS, Azure, GCP, Kubernetes, Docker
-   - Databases: PostgreSQL, MongoDB, Redis, Pinecone, Weaviate, ChromaDB
-   - Specific architectures: RAG, Transformer, LSTM, Microservices
-   - Hardware: NVIDIA H100, NVIDIA A100, TPU
-   - Named tools: Git, Jenkins, Terraform, Prometheus
+   
+   INCLUDE (categories only, examples removed):
+- Programming languages (e.g., Python, Java)
+- Named frameworks
+- Specific APIs
+- Named platforms (cloud, DevOps)
+- Databases with proper names
+- Specific architectures
+- Hardware platforms
+- Named tools
 
    Keyword priority order (extract in this order):
+(do not used the examples provided)
       1. Programming languages (e.g., Python, Java)
       2. AI/ML frameworks (e.g., PyTorch, TensorFlow, LangChain)
       3. Specific APIs (e.g., OpenAI API, Anthropic Claude API)
-      4. Databases with names (e.g., PostgreSQL, Pinecone, ChromaDB)
+      4. Databases with names (e.g., Pinecone, ChromaDB)
       5. Cloud platforms (e.g., AWS, GCP, Azure)
       6. DevOps tools (e.g., Docker, Kubernetes, Jenkins)
       7. Hardware platforms (e.g., NVIDIA H100, NVIDIA A100)
@@ -87,8 +90,9 @@ KEYWORDS:
    - Would it look natural in "Skills: [keyword1], [keyword2]"? If no → REJECT
 
    EXAMPLE OUTPUT:
-   Valid keywords: ["Python", "PyTorch", "OpenAI API", "Docker", "PostgreSQL", "AWS", "RAG"]
-   Invalid keywords: ["production code", "data interaction", "AI systems", "use tools", "develop applications"]
+   (do not used the examples provided, used from actualy job posting)
+Valid keywords: ["<keyword1>", "<keyword2>", ...]
+Invalid keywords: ["production code", "data interaction", "AI systems", "use tools", "develop applications"]
 
 ___
 2. Scan the LaTeX resume for opportunities to improve existing content
@@ -116,7 +120,10 @@ ___
    DO NOT modify: macros, preamble, section headers
 
 3. Return ONLY edits that are HONEST improvements to existing content
-
+⚠️ CRITICAL: If there are no honest edits to suggest for a particular bullet or section:
+- Return the original LaTeX text as "updated"
+- Provide a "reason" explaining what could be improved (e.g., clarity, quantifiable metrics, what relevant technical stack can be added there), even if no change is applied
+- Never leave "updated" undefined or empty
 RULES:
 - Be selective: only suggest changes that genuinely improve the resume WITHOUT lying
 - Each edit must include the EXACT original LaTeX text

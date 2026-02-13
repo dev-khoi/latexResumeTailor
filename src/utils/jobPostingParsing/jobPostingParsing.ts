@@ -5,7 +5,7 @@ const fs = require("fs").promises
 const extractHTMLFromUrl = async (url: string): Promise<string> => {
   try {
     const browser = await puppeteer.launch({ headless: true })
-    console.log(url , browser)
+    console.log(url, browser)
     const page = await browser.newPage()
     try {
       await page.goto(url, { waitUntil: "networkidle2" })
@@ -53,17 +53,27 @@ const extractHTMLFromUrl = async (url: string): Promise<string> => {
       })
 
       // Remove HTML comments
-      const removeComments = (node: Node) => {
+      const removeComments = (node: Node | null) => {
+        if (!node) return
         for (let i = node.childNodes.length - 1; i >= 0; i--) {
           const child = node.childNodes[i]
-          if (child.nodeType === 8) {
-            node.removeChild(child)
-          } else if (child.nodeType === 1) {
-            removeComments(child)
-          }
+          if (!child) continue
+          if (child.nodeType === 8) node.removeChild(child)
+          else if (child.nodeType === 1) removeComments(child)
         }
       }
       removeComments(document.body)
+      const flattenTextNodes = (node: Element | null) => {
+        if (!node) return
+        node.querySelectorAll("div, span").forEach((el) => {
+          if (el.children.length === 0 && el.textContent?.trim()) {
+            el.replaceWith(document.createTextNode(el.textContent))
+          } else {
+            flattenTextNodes(el as Element)
+          }
+        })
+      }
+      flattenTextNodes(document.body)
 
       // Remove inline event handlers and noisy attributes
       document.querySelectorAll("*").forEach((el) => {
@@ -102,17 +112,25 @@ const extractHTMLFromUrl = async (url: string): Promise<string> => {
           el.replaceWith(document.createTextNode(el.textContent))
         }
       })
+      document.querySelectorAll("*").forEach((el) => {
+        const style = window.getComputedStyle(el)
+        if (
+          style.display === "none" ||
+          (el instanceof HTMLElement && (el.offsetHeight === 0 || el.offsetWidth === 0))
+        ) {
+          el.remove()
+        }
+      })
     })
 
     // Extract main content if available, otherwise body
-    const bodyHtml = await page.evaluate(() => {
-      const main = document.querySelector(
-        "main, [role='main'], #content, .main, .content"
-      )
-      return main ? main.innerHTML : document.body.innerHTML
-    })
+    const mainSelector = "main, [role='main'], #content, .main, .content"
+    const bodyHtml = await page.evaluate((selector) => {
+      const main = document.querySelector(selector)
+      return main ? main.innerHTML : document.body?.innerHTML || ""
+    }, mainSelector)
 
-    await browser.close()
+    if (browser) await browser.close()
 
     return bodyHtml
   } catch (error) {

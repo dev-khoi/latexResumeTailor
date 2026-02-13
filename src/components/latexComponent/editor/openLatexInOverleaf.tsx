@@ -50,6 +50,12 @@ export function OpenLatexInOverleaf({
       input.value = encodeURIComponent(latexContent)
       form.appendChild(input)
 
+      const inputTitle = document.createElement("input")
+      inputTitle.type = "hidden"
+      inputTitle.name = "main_document" // this sets the main .tex filename
+      inputTitle.value = "MyProject.tex" // replace with your desired title
+      form.appendChild(inputTitle)
+
       // Submit the form
       document.body.appendChild(form)
       form.submit()
