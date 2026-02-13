@@ -29,7 +29,9 @@ export function LogoutOrLoginButton({ className, size = "sm" }: Props) {
   const handleLogout = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
-    router.push("/auth/login")
+    setIsSignedIn(false)
+    router.refresh()
+    router.push("/")
   }
 
   const handleLogin = () => {
@@ -46,18 +48,14 @@ export function LogoutOrLoginButton({ className, size = "sm" }: Props) {
 
   if (isSignedIn) {
     return (
-      <DropdownMenuItem asChild>
-        <Button
-          variant="destructive"
-          className="w-full justify-start"
-          onClick={async () => {
-            const supabase = createClient()
-            await supabase.auth.signOut()
-            router.push("/auth/login")
-          }}
-        >
-          Logout
-        </Button>
+      <DropdownMenuItem
+        className="cursor-pointer"
+        onClick={(e) => {
+          e.preventDefault()
+          handleLogout()
+        }}
+      >
+        <span className="text-destructive font-medium">Logout</span>
       </DropdownMenuItem>
     )
   }
