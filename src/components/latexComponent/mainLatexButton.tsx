@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Resume } from "@/database/storage/resume"
 
-import { MainResumeDisplay } from "./mainLatexDisplay"
+import { MainResumeDisplay } from "./mainLatexFile"
 
 export default function MainLatexButton({
   onResumeChange,

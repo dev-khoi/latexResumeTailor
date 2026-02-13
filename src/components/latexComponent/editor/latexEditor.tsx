@@ -7,37 +7,6 @@ import { Bold, Italic, Sparkles } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 
-const defaultLatexTemplate = `\\documentclass[11pt,a4paper]{article}
-\\usepackage[utf8]{inputenc}
-\\usepackage{geometry}
-\\geometry{margin=1in}
-
-\\begin{document}
-
-\\begin{center}
-  {\\LARGE \\textbf{Your Name}} \\\\[0.2cm]
-  Email: your.email@example.com | Phone: (123) 456-7890
-\\end{center}
-
-\\section*{Education}
-\\textbf{University Name} \\hfill City, State \\\\
-Bachelor of Science in Computer Science \\hfill Expected Graduation: May 2024
-
-\\section*{Experience}
-\\textbf{Software Engineer Intern} \\hfill Summer 2023 \\\\
-\\textit{Company Name} \\hfill City, State
-\\begin{itemize}
-  \\item Developed and maintained features using React and Node.js
-  \\item Collaborated with cross-functional teams to deliver projects
-\\end{itemize}
-
-\\section*{Skills}
-\\textbf{Programming Languages:} JavaScript, TypeScript, Python, Java \\\\
-\\textbf{Frameworks \\& Tools:} React, Next.js, Node.js, Git
-
-\\end{document}
-`
-
 export function LatexEditor({
   initialContent,
   enableAITailoring = false,
@@ -46,7 +15,7 @@ export function LatexEditor({
   enableAITailoring?: boolean
 }) {
   const [latexContent, setLatexContent] = useState(
-    initialContent || defaultLatexTemplate
+    initialContent || "Cannot open file"
   )
   const [editorInstance, setEditorInstance] = useState<any>(null)
   const [isBoldActive, setIsBoldActive] = useState(false)
@@ -296,8 +265,8 @@ export function LatexEditor({
       )}
 
       {/* Toolbar */}
-      <div className="flex items-center gap-2 border-b bg-white p-2 flex-shrink-0">
-        {/* Text Type Dropdown */}
+      {/* <div className="flex items-center gap-2 border-b bg-white p-2 flex-shrink-0">
+      
         <div className="border-r pr-2">
           <select
             className="px-3 py-1.5 border rounded hover:border-gray-50 cursor-pointer text-sm"
@@ -321,7 +290,6 @@ export function LatexEditor({
           </select>
         </div>
 
-        {/* Text Formatting */}
         <div className="flex items-center gap-1">
           <button
             onClick={() => insertText("\\textbf{", "}", setIsBoldActive)}
@@ -344,7 +312,7 @@ export function LatexEditor({
             <Italic size={20} strokeWidth={3} className="text-black" />
           </button>
         </div>
-      </div>
+      </div> */}
 
       {/* Editor */}
       <div className="flex-1">

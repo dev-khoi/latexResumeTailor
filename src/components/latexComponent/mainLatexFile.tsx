@@ -21,9 +21,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 import { Input } from "../ui/input"
 import { ConfirmRemovalDialog } from "./confirmRemoval"
+import { LatexEditor } from "./editor/latexEditor"
 
 export function MainResumeDisplay({
   onResumeChange,
@@ -39,8 +48,10 @@ export function MainResumeDisplay({
   const [uploading, setUploading] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showEditor, setShowEditor] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const [mainResumeContent, setMainResumeContent] = useState<string>("")
   const loadMainResume = async () => {
     setLoading(true)
     setError("")
@@ -56,18 +67,35 @@ export function MainResumeDisplay({
     }
     setLoading(false)
   }
-
+  //
+  async function loadResumeContent() {
+    if (!mainResume) {
+      return
+    }
+    const url = await getLatexFileUrl(mainResume.file_path)
+    if (!url) {
+      throw new Error("Failed to get file URL")
+    }
+    const response = await fetch(url)
+    const data: string = await response.text()
+    setMainResumeContent(data)
+  }
+  //
   useEffect(() => {
     loadMainResume()
   }, [])
+  useEffect(() => {
+    loadResumeContent()
+  }, [mainResume])
 
   const handleView = async () => {
     if (!mainResume) return
-    const url = await getLatexFileUrl(mainResume.file_path)
-    if (url) {
-      window.open(url)
-    } else {
-      setError("Failed to get file URL")
+    try {
+      setShowEditor(true)
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to load resume content"
+      )
     }
   }
 
@@ -276,7 +304,10 @@ export function MainResumeDisplay({
                 <X className="h-3 w-3" />
               </Button>
 
-              <div className="space-y-3 w-full">
+              <div
+                className="space-y-3 w-full hover:cursor-pointer"
+                onClick={handleView}
+              >
                 <div className="flex flex-col items-center justify-center text-center gap-2">
                   <div className="rounded-lg bg-primary/10 p-3">
                     <FileText className="h-6 w-6 text-primary" />
@@ -309,6 +340,31 @@ export function MainResumeDisplay({
         onConfirm={handleConfirmDelete}
         isDeleting={deleting}
       />
+
+      <Dialog open={showEditor} onOpenChange={setShowEditor}>
+        <DialogContent className="max-w-5xl w-[95vw] h-[90vh] p-0 overflow-hidden">
+          <DialogHeader className="px-6 pt-4 pb-2">
+            <DialogTitle>Main LaTeX Resume</DialogTitle>
+            <DialogDescription className="text-xs">
+              View or edit your uploaded LaTeX source.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 px-6 pb-6 h-[calc(90vh-96px)]">
+            {loading ? (
+              <div className="h-full w-full flex items-center justify-center text-sm text-muted-foreground">
+                Loading content...
+              </div>
+            ) : (
+              <LatexEditor initialContent={mainResumeContent} />
+            )}
+          </div>
+          <DialogFooter className="px-6 pb-4">
+            <Button variant="outline" onClick={() => setShowEditor(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }
