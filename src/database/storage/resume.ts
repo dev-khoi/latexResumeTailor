@@ -52,7 +52,7 @@ export async function uploadLatexFile(
       })
 
     if (error) {
-      console.log("Upload error:", error)
+      console.error("Upload error:", error)
       return {
         success: false,
         error: error.message,
@@ -86,7 +86,7 @@ export async function getLatexFileUrl(path: string): Promise<string | null> {
     .from("latexResume")
     .createSignedUrl(path, 60 * 10) // 10 minutes
 
-  console.log(data)
+  // console.log(data)
   if (error) {
     console.error("Error getting signed URL:", error)
     return null

@@ -94,14 +94,14 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url: jobUrl }),
       })
-      console.log(extractResponse)
+      // console.log(extractResponse)
       if (!extractResponse.ok) {
         const errorData = await extractResponse.json()
         throw new Error(errorData.error || "Failed to extract job posting")
       }
 
       const { html: jobDescription } = await extractResponse.json()
-      console.log(jobDescription)
+      // console.log(jobDescription)
 
       // Step 2: Tailor resume via API
       setTailoringStage("tailoring")
