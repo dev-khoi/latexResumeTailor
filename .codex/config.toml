@@ -1,0 +1,261 @@
+# =========================
+# GPT Codex – config.toml
+# =========================
+
+[project]
+name = "Resume Keyword Tweak Frontend"
+description = "Next.js application for resume keyword optimization with Supabase backend and HeroUI components"
+version = "0.0.1"
+type = "web-application"
+
+# -------------------------
+# MCP Servers
+# -------------------------
+[mcpServers.resume-keyword-tweak]
+type = "filesystem"
+description = "Resume Keyword Tweak Frontend - Next.js + Supabase + HeroUI"
+
+[mcpServers.resume-keyword-tweak.metadata]
+projectType = "nextjs"
+framework = "Next.js 15.5.9"
+runtime = "Node.js"
+database = "Supabase (PostgreSQL)"
+uiLibrary = "HeroUI"
+styling = "Tailwind CSS 4.1.11"
+packageManager = "pnpm"
+
+[[mcpServers.resume-keyword-tweak.resources.schemas]]
+path = "types"
+description = "TypeScript type definitions"
+
+[[mcpServers.resume-keyword-tweak.resources.schemas]]
+path = "utils/supabase"
+description = "Supabase client configurations"
+
+[[mcpServers.resume-keyword-tweak.resources.components]]
+path = "components"
+description = "React components"
+
+[[mcpServers.resume-keyword-tweak.resources.components]]
+path = "app"
+description = "Next.js App Router pages and layouts"
+
+[[mcpServers.resume-keyword-tweak.resources.config]]
+path = "config"
+description = "Application configuration files"
+
+[[mcpServers.resume-keyword-tweak.resources.config]]
+path = "tsconfig.json"
+description = "TypeScript configuration"
+
+[[mcpServers.resume-keyword-tweak.resources.config]]
+path = "next.config.js"
+description = "Next.js configuration"
+
+[[mcpServers.resume-keyword-tweak.resources.config]]
+path = "eslint.config.mjs"
+description = "ESLint configuration"
+
+[[mcpServers.resume-keyword-tweak.resources.config]]
+path = "hero.ts"
+description = "HeroUI theme configuration"
+
+[[mcpServers.resume-keyword-tweak.tools]]
+name = "dev"
+command = "pnpm dev"
+description = "Start development server with Turbopack"
+
+[[mcpServers.resume-keyword-tweak.tools]]
+name = "build"
+command = "pnpm build"
+description = "Build production bundle"
+
+[[mcpServers.resume-keyword-tweak.tools]]
+name = "lint"
+command = "pnpm lint"
+description = "Run ESLint with auto-fix"
+
+# -------------------------
+# Technology Stack
+# -------------------------
+[technology_stack.frontend]
+framework = "Next.js 15.5.9"
+bundler = "Turbopack"
+language = "TypeScript 5.6.3"
+uiLibrary = "HeroUI"
+styling = "Tailwind CSS 4.1.11"
+stateManagement = "React 18.3.1"
+animation = "Framer Motion 11.18.2"
+
+[technology_stack.backend]
+database = "Supabase (PostgreSQL)"
+auth = "@supabase/ssr 0.8.0"
+clientLibrary = "@supabase/supabase-js 2.91.0"
+
+[technology_stack.devTools]
+linter = "ESLint 9.25.1"
+formatter = "Prettier 3.5.3"
+typeChecker = "TypeScript 5.6.3"
+
+# -------------------------
+# Directory Structure
+# -------------------------
+[directory_structure.app]
+description = "Next.js App Router - pages, layouts, and routes"
+
+[directory_structure.app.subdirectories]
+about = "About page route"
+blog = "Blog section route"
+docs = "Documentation route"
+pricing = "Pricing page route"
+
+[directory_structure.components]
+description = "Reusable React components"
+key_files = [
+  "navbar.tsx",
+  "counter.tsx",
+  "icons.tsx",
+  "theme-switch.tsx",
+  "primitives.ts"
+]
+
+[directory_structure.config]
+description = "Application configuration"
+key_files = ["fonts.ts", "site.ts"]
+
+[directory_structure.utils]
+description = "Utility functions and helpers"
+
+[directory_structure.utils.supabase]
+description = "Supabase client setup for different contexts"
+files = [
+  "client.ts",
+  "server.ts",
+  "middleware.ts",
+  "supabase.ts"
+]
+
+[directory_structure.types]
+description = "TypeScript type definitions"
+files = ["index.ts"]
+
+[directory_structure.styles]
+description = "Global styles"
+files = ["globals.css"]
+
+[directory_structure.public]
+description = "Static assets"
+
+# -------------------------
+# Key Dependencies
+# -------------------------
+[key_dependencies]
+ui_components = [
+  "@heroui/accordion",
+  "@heroui/alert",
+  "@heroui/autocomplete",
+  "@heroui/avatar",
+  "@heroui/badge",
+  "@heroui/button",
+  "@heroui/card",
+  "@heroui/chip",
+  "@heroui/code",
+  "@heroui/divider",
+  "@heroui/drawer",
+  "@heroui/dropdown",
+  "@heroui/form",
+  "@heroui/image",
+  "@heroui/input",
+  "@heroui/kbd",
+  "@heroui/link",
+  "@heroui/listbox",
+  "@heroui/modal",
+  "@heroui/navbar",
+  "@heroui/pagination",
+  "@heroui/popover",
+  "@heroui/progress",
+  "@heroui/radio",
+  "@heroui/scroll-shadow",
+  "@heroui/select",
+  "@heroui/skeleton",
+  "@heroui/snippet",
+  "@heroui/spacer",
+  "@heroui/spinner",
+  "@heroui/switch",
+  "@heroui/system",
+  "@heroui/table",
+  "@heroui/tabs",
+  "@heroui/theme",
+  "@heroui/toast",
+  "@heroui/tooltip",
+  "@heroui/user"
+]
+
+utilities = [
+  "clsx",
+  "next-themes",
+  "intl-messageformat"
+]
+
+# -------------------------
+# Environment Variables
+# -------------------------
+[[environment_variables.required]]
+name = "NEXT_PUBLIC_SUPABASE_URL"
+description = "Supabase project URL"
+scope = "public"
+
+[[environment_variables.required]]
+name = "NEXT_PUBLIC_SUPABASE_ANON_KEY"
+description = "Supabase anonymous/public key"
+scope = "public"
+
+[[environment_variables.required]]
+name = "SUPABASE_SERVICE_ROLE_KEY"
+description = "Supabase service role key for server-side operations"
+scope = "private"
+
+# -------------------------
+# Development Workflow
+# -------------------------
+[development_workflow]
+setup = [
+  "Clone repository",
+  "Install dependencies: pnpm install",
+  "Configure environment variables in .env.local",
+  "Start dev server: pnpm dev"
+]
+
+[development_workflow.commands]
+dev = "pnpm dev"
+build = "pnpm build"
+start = "pnpm start"
+lint = "pnpm lint"
+
+# -------------------------
+# Architecture Patterns
+# -------------------------
+[architecture_patterns]
+routing = "Next.js App Router"
+data_fetching = "React Server Components + Supabase"
+styling = "Tailwind CSS + HeroUI"
+authentication = "Supabase Auth with SSR"
+type_safety = "TypeScript strict mode"
+
+# -------------------------
+# Best Practices
+# -------------------------
+[best_practices]
+component_structure = "Functional components with TypeScript"
+state_management = "React hooks"
+
+[best_practices.supabase_clients]
+browser = "utils/supabase/client.ts"
+server = "utils/supabase/server.ts"
+middleware = "utils/supabase/middleware.ts"
+
+[best_practices.styling]
+approach = "HeroUI components with Tailwind utilities"
+
+[best_practices.type_definitions]
+location = "types/index.ts"

@@ -23,7 +23,7 @@ export default function MainLatexButton({
   }
 
   return (
-    <div className="flex flex-col align-middle">
+    <div className="w-full">
       {/* Main Resume Display with Upload */}
       <MainResumeDisplay
         key={refreshKey}

@@ -22,6 +22,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 
+import { Input } from "../ui/input"
 import { ConfirmRemovalDialog } from "./confirmRemoval"
 
 export function MainResumeDisplay({
@@ -196,11 +197,13 @@ export function MainResumeDisplay({
   if (loading) {
     return (
       <>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-base">Based Resume</CardTitle>
+        <CardHeader className="py-2 px-0 text-left">
+          <CardTitle className="text-base !pl-0 text-left">
+            Based Latex Resume
+          </CardTitle>{" "}
         </CardHeader>
-        <Card className="py-3 w-60 h-70 !mt-0">
-          <CardContent className="flex items-center justify-center space-y-3 !py-6 !pb-6">
+        <Card className="w-60 !h-70 !mt-0 !pb-0 !px-auto flex flex-col justify-center !mx-auto border-slate-400">
+          <CardContent className="space-y-3 !py-6 !pb-6 flex flex-col justify-center items-center mx-auto ">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </CardContent>
         </Card>
@@ -210,13 +213,15 @@ export function MainResumeDisplay({
 
   return (
     <>
-      <CardHeader className="py-2 px-0">
-        <CardTitle className="text-base !pl-0">Based Latex Resume</CardTitle>
+      <CardHeader className="py-2 px-0 text-left">
+        <CardTitle className="text-base !pl-0 text-left">
+          Based Latex Resume
+        </CardTitle>
       </CardHeader>
-      <Card className=" w-60 h-70 !mt-0 !pb-0 mx-auto">
-        <CardContent className="space-y-3 !py-6 !pb-6 flex flex-col ">
+      <Card className="relative w-60 h-70 !mt-0 !pb-0 !px-auto flex flex-col justify-center !mx-auto border-slate-400">
+        <CardContent className="space-y-3 !py-6 !pb-6 flex flex-col justify-center items-center mx-auto ">
           {error && (
-            <div className="rounded-md bg-red-50 dark:bg-red-950 p-2 text-xs text-red-600 dark:text-red-400">
+            <div className="rounded-md  bg-red-50 dark:bg-red-950 p-2 text-xs text-red-600 dark:text-red-400">
               {error}
             </div>
           )}
@@ -227,13 +232,13 @@ export function MainResumeDisplay({
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onClick={() => fileInputRef.current?.click()}
-              className={`cursor-pointer text-center py-8 px-4 border-2 border-dashed rounded-lg transition-colors ${
+              className={`cursor-pointer text-center py-8 px-4 border-2 border-dashed border-slate-500 rounded-lg transition-colors ${
                 isDragging
                   ? "border-primary bg-primary/5"
-                  : "border-muted-foreground/25 hover:border-primary/50 hover:bg-accent/50"
+                  : "border-muted-foreground/50 hover:border-primary hover:bg-accent/50"
               }`}
             >
-              <input
+              <Input
                 ref={fileInputRef}
                 type="file"
                 accept=".tex,.latex"
@@ -253,7 +258,8 @@ export function MainResumeDisplay({
                     Upload your latex Resume
                   </p>
                   <p className="text-xs mt-1 text-muted-foreground">
-                    Click or drag & drop your .tex file
+                    Click or drag & drop your{" "}
+                    <span className="text-green-800">.tex</span> file
                   </p>
                 </>
               )}
@@ -265,17 +271,17 @@ export function MainResumeDisplay({
                 size="sm"
                 onClick={handleDeleteClick}
                 disabled={deleting}
-                className="text-xs size-2 absolute self-end"
+                className="text-xs absolute top-2 right-2 h-6 w-6 p-0"
               >
                 <X className="h-3 w-3" />
               </Button>
 
-              <div className="space-y-3">
-                <div className="flex flex-col items-center text-center gap-2">
+              <div className="space-y-3 w-full">
+                <div className="flex flex-col items-center justify-center text-center gap-2">
                   <div className="rounded-lg bg-primary/10 p-3">
                     <FileText className="h-6 w-6 text-primary" />
                   </div>
-                  <div className="w-full min-w-0">
+                  <div className="w-full max-w-[210px] min-w-0">
                     <p
                       className="font-medium text-sm truncate px-2"
                       title={mainResume.original_file_name}

@@ -1,9 +1,8 @@
 export type SiteConfig = typeof siteConfig
 
 export const siteConfig = {
-  name: "Retro",
-  description:
-    "Beautifully designed components built with Radix UI and Tailwind CSS.",
+  name: "latexResumeTailor",
+  description: "Tailor your latex resume to the job url",
   mainNav: [
     {
       title: "",
@@ -11,8 +10,7 @@ export const siteConfig = {
     },
   ],
   links: {
-    twitter: "https://twitter.com/kathanmehtaa",
-    github: "https://github.com/DarkInventor",
-    docs: "https://easyui.pro",
+    github: "https://github.com/dev-khoi/resumeTailor",
+    personalGithub: "https://github.com/dev-khoi",
   },
 }

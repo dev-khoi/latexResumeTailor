@@ -54,7 +54,7 @@ Instructions:
 4. Return the keywords array and edits array as specified in the schema`
 
   const result = await generateText({
-    model: "google/gemini-2.5-flash",
+    model: "deepseek/deepseek-v3.2",
     system: systemPrompt,
     prompt: prompt,
     output: Output.object({

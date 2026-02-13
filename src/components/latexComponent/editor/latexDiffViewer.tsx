@@ -136,7 +136,7 @@ export function LatexDiffViewer({
         if (matchingEdit) {
           const changeKey = getChangeKey(change)
           widgetMap[changeKey] = (
-            <div className="flex items-start gap-3 px-4 py-3 bg-blue-50 dark:bg-blue-950/30 border-l-4 border-blue-500">
+            <div className="flex items-start gap-3 px-4 py-3 bg-blue-50 dark:bg-blue-900 border-l-4 border-blue-500">
               <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
               <div className="flex-1">
                 <p className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
@@ -184,7 +184,7 @@ export function LatexDiffViewer({
   }
 
   return (
-    <div className="h-full w-full overflow-auto bg-white dark:bg-slate-900">
+    <div className="h-full w-full overflow-auto bg-white">
       {files.map((file, index) => (
         <Diff
           key={index}

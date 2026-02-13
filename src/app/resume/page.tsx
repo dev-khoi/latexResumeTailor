@@ -1,13 +1,16 @@
+// Updated src/app/resume/page.tsx (key changes)
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import type { ResumeEdit } from "@/ai/agents/latexTailor"
 import { Resume, getLatexFileUrl } from "@/database/storage/resume"
+import isValidUrl from "@/utils/jobUrlValidation"
+import { analyzeKeywordUsage } from "@/utils/usedKeywordCheck"
 import { Sparkles } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { LatexDiffViewer } from "@/components/latexComponent/editor/latexDiffViewer"
+import { LatexDiffViewerWrapper } from "@/components/latexComponent/editor/latexDiffViewerWrapper"
 import OpenLatexInOverleaf from "@/components/latexComponent/editor/openLatexInOverleaf"
 import MainLatexButton from "@/components/latexComponent/mainLatexButton"
 
@@ -21,15 +24,13 @@ export default function Home() {
   const [error, setError] = useState<string>("")
   const [resumeFilePath, setResumeFilePath] = useState<string>("")
 
-  // Validate URL format
-  const isValidUrl = (url: string): boolean => {
-    try {
-      new URL(url)
-      return true
-    } catch {
-      return false
+  // Analyze keyword usage based on current content
+  const keywordAnalysis = useMemo(() => {
+    if (!keywords.length || !resumeContent) {
+      return { usedKeywords: [], unusedKeywords: [] }
     }
-  }
+    return analyzeKeywordUsage(keywords, resumeContent)
+  }, [keywords, resumeContent])
 
   const handleResumeChange = () => {
     // Reset content when resume changes
@@ -90,7 +91,7 @@ export default function Home() {
       }
 
       const { html: jobDescription } = await extractResponse.json()
-
+      // console.log(jobDescription)
       // Step 2: Tailor resume via API
       const tailorResponse = await fetch("/api/tailor-resume", {
         method: "POST",
@@ -121,11 +122,11 @@ export default function Home() {
   }
 
   return (
-    <div className="relative flex justify-center bg-background px-4 py-10 lg:items-center">
-      <div className="flex w-full max-w-[1800px] flex-col gap-8 lg:flex-row px-8 items-stretch">
+    <div className="relative flex justify-center bg-background px-4 py-10 items-center">
+      <div className="flex w-full max-w-[1800px] flex-col gap-8 lg:flex-row px-8 items-stretch ">
         {/* Sidebar with Job URL and Controls */}
         <aside className="sticky top-20 flex h-full min-h-[600px] items-start w-80 flex-col gap-6 rounded-3xl border border-border bg-card/80 p-6 text-card-foreground shadow-2xl backdrop-blur">
-          <div className="space-y-2">
+          <div className="space-y-2 ">
             <h4 className="text-lg font-semibold">AI Resume Tailoring</h4>
             <p className="text-sm text-muted-foreground">
               Upload your resume and enter a job URL to get AI-optimized version
@@ -187,49 +188,73 @@ export default function Home() {
             )}
 
             {keywords.length > 0 && (
-              <div className="space-y-2">
-                <h5 className="text-sm font-semibold text-foreground">
-                  Extracted Keywords ({keywords.length})
-                </h5>
-                <div className="flex flex-wrap gap-1 max-h-32 overflow-y-auto">
-                  {keywords.map((keyword, idx) => (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h5 className="text-sm font-semibold text-foreground">
+                    Keywords Analysis
+                  </h5>
+                  <div className="text-xs text-muted-foreground">
+                    <span className="text-green-600 dark:text-green-400 font-medium">
+                      {keywordAnalysis.usedKeywords.length}
+                    </span>
+                    <span className="mx-1">/</span>
+                    <span>{keywords.length}</span>
+                    <span className="ml-1">used</span>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-1 max-h-48 overflow-y-auto p-2 bg-muted/30 rounded-lg">
+                  {/* Used Keywords - Green */}
+                  {keywordAnalysis.usedKeywords.map((keyword, idx) => (
                     <span
-                      key={idx}
-                      className="rounded-md bg-blue-500/10 border border-blue-500/30 px-2 py-1 text-xs text-blue-600 dark:text-blue-400"
+                      key={`used-${idx}`}
+                      className="rounded-md bg-green-500/10 border border-green-500/30 px-2 py-1 text-xs text-green-600 dark:text-green-400 flex items-center gap-1"
+                      title="Keyword found in resume"
                     >
+                      <svg
+                        className="w-3 h-3"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      {keyword}
+                    </span>
+                  ))}
+
+                  {/* Unused Keywords - Red */}
+                  {keywordAnalysis.unusedKeywords.map((keyword, idx) => (
+                    <span
+                      key={`unused-${idx}`}
+                      className="rounded-md bg-red-500/10 border border-red-500/30 px-2 py-1 text-xs text-red-600 dark:text-red-400 flex items-center gap-1"
+                      title="Keyword missing from resume"
+                    >
+                      <svg
+                        className="w-3 h-3"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
                       {keyword}
                     </span>
                   ))}
                 </div>
-              </div>
-            )}
 
-            {suggestedEdits.length > 0 && (
-              <div className="space-y-2">
-                <h5 className="text-sm font-semibold text-foreground">
-                  Suggested Changes ({suggestedEdits.length})
-                </h5>
-                <div className="max-h-48 overflow-y-auto space-y-2">
-                  {suggestedEdits.map((edit, idx) => (
-                    <div
-                      key={idx}
-                      className="rounded-md bg-muted/50 border border-border p-2"
-                    >
-                      <p className="text-muted-foreground text-xs italic mb-1">
-                        {edit.reason}
-                      </p>
-                      <div className="text-xs">
-                        <span className="text-red-600 dark:text-red-400">
-                          - {edit.original}
-                        </span>
-                        <br />
-                        <span className="text-green-600 dark:text-green-400">
-                          + {edit.updated}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                {keywordAnalysis.unusedKeywords.length > 0 && (
+                  <p className="text-xs text-muted-foreground italic">
+                    💡 Red keywords are missing from your resume and should be
+                    incorporated
+                  </p>
+                )}
               </div>
             )}
           </div>
@@ -259,17 +284,10 @@ export default function Home() {
                   />
                 </div>
               )}
-              <LatexDiffViewer
-                //
+              <LatexDiffViewerWrapper
                 suggestedEdits={suggestedEdits}
-                originalContent={
-                  resumeContent ||
-                  `Couldn't render latex content or file is empty`
-                }
-                tailoredContent={
-                  tailoredContent ||
-                  `Couldn't render tailored latex content or file is empty, sorry :(`
-                }
+                originalContent={resumeContent}
+                tailoredContent={tailoredContent}
               />
             </div>
           </div>
