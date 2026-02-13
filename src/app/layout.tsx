@@ -1,6 +1,7 @@
 import "react-diff-view/style/index.css"
 import "./globals.css"
 import { Metadata } from "next"
+import { Analytics } from "@vercel/analytics/next"
 
 import { siteConfig } from "@/config/site"
 import { fontSans } from "@/lib/fonts"
@@ -38,7 +39,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <div className="relative flex min-h-screen flex-col">
             <SiteHeader />
-            <main className="flex-1">{children}</main>
+            <main className="flex-1">
+              {children}
+              <Analytics />
+            </main>
             <SiteFooter className="border-t" />
           </div>
           <TailwindIndicator />
