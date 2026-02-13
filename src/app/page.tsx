@@ -256,7 +256,7 @@ export default function IndexPage() {
           ].map((item, idx) => (
             <Card
               key={idx}
-              className="relative overflow-hidden shadow-lg dark:shadow-black"
+              className="relative overflow-hidden shadow-lg dark:shadow-black border-green-600 dark:border-green-700 border-4 transition-transform duration-300 ease-out hover:scale-110 hover:shadow-2xl"
             >
               <CardHeader>
                 <div className="flex items-center gap-4 mb-2">
