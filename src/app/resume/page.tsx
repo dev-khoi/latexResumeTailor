@@ -12,6 +12,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { LatexDiffViewerWrapper } from "@/components/latexComponent/editor/latexDiffViewerWrapper"
 import OpenLatexInOverleaf from "@/components/latexComponent/editor/openLatexInOverleaf"
+import {
+  LatexImprovementStatus,
+  TailoringStage,
+} from "@/components/latexComponent/latexResumeImprovementStatus"
 import MainLatexButton from "@/components/latexComponent/mainLatexButton"
 
 export default function Home() {
@@ -23,6 +27,8 @@ export default function Home() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string>("")
   const [resumeFilePath, setResumeFilePath] = useState<string>("")
+  const [tailoringStage, setTailoringStage] = useState<TailoringStage>("idle")
+  const [modalError, setModalError] = useState<string>("")
 
   // Analyze keyword usage based on current content
   const keywordAnalysis = useMemo(() => {
@@ -40,6 +46,8 @@ export default function Home() {
     setKeywords([])
     setError("")
     setResumeFilePath("")
+    setTailoringStage("idle")
+    setModalError("")
   }
 
   // Fetch the latex file content
@@ -76,6 +84,8 @@ export default function Home() {
 
     setIsProcessing(true)
     setError("")
+    setModalError("")
+    setTailoringStage("extracting")
 
     try {
       // Step 1: Extract job description from URL via API
@@ -92,7 +102,9 @@ export default function Home() {
 
       const { html: jobDescription } = await extractResponse.json()
       console.log(jobDescription)
+
       // Step 2: Tailor resume via API
+      setTailoringStage("tailoring")
       const tailorResponse = await fetch("/api/tailor-resume", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -113,9 +125,26 @@ export default function Home() {
       setSuggestedEdits(edits)
       setKeywords(keywords)
       setTailoredContent(tailoredContent)
+
+      // Show completion stage
+      setTailoringStage("complete")
+
+      // Close modal after showing completion for 2 seconds
+      setTimeout(() => {
+        setTailoringStage("idle")
+      }, 2000)
     } catch (err) {
       console.error("Error tailoring resume:", err)
-      setError(err instanceof Error ? err.message : "Failed to tailor resume")
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to tailor resume"
+      setError(errorMessage)
+      setModalError(errorMessage)
+      setTailoringStage("error")
+
+      // Close error modal after 4 seconds
+      setTimeout(() => {
+        setTailoringStage("idle")
+      }, 4000)
     } finally {
       setIsProcessing(false)
     }
@@ -123,6 +152,11 @@ export default function Home() {
 
   return (
     <div className="relative flex justify-center bg-background px-4 py-10 items-center">
+      <LatexImprovementStatus
+        isOpen={tailoringStage !== "idle"}
+        currentStage={tailoringStage}
+        errorMessage={modalError}
+      />
       <div className="flex w-full max-w-[1800px] flex-col gap-8 lg:flex-row px-8 items-stretch ">
         {/* Sidebar with Job URL and Controls */}
         <aside className="sticky top-20 flex h-full min-h-[600px] items-start w-80 flex-col gap-6 rounded-3xl border border-border bg-card/80 p-6 text-card-foreground shadow-2xl backdrop-blur">

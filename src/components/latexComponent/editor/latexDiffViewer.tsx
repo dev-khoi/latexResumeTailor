@@ -140,7 +140,7 @@ export function LatexDiffViewer({
               <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
               <div className="flex-1">
                 <p className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
-                  Why this changed:
+                  How this can be improved
                 </p>
                 <p className="text-sm text-blue-800 dark:text-blue-200">
                   {matchingEdit.reason}
