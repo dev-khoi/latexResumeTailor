@@ -15,16 +15,13 @@ export const metadata: Metadata = {
     default: siteConfig.name,
     template: `%s - ${siteConfig.name}`,
   },
-
   description: siteConfig.description,
-
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon-16x16.png",
     apple: "/apple-touch-icon.png",
-  }
+  },
 }
-
 interface RootLayoutProps {
   children: React.ReactNode
 }
@@ -32,8 +29,6 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" suppressHydrationWarning>
-      
-      <head />
       <body
         className={cn(
           "max-h-auto bg-background font-sans antialiased",
@@ -67,7 +62,7 @@ export const viewport = {
         icon: "/favicon.ico",
         shortcut: "/favicon-16x16.png",
         apple: "/apple-touch-icon.png",
-      }
+      },
     },
     {
       title: {
@@ -81,7 +76,7 @@ export const viewport = {
         icon: "/favicon.ico",
         shortcut: "/favicon-16x16.png",
         apple: "/apple-touch-icon.png",
-      }
+      },
     },
-  ]
-};
+  ],
+}

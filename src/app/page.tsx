@@ -191,15 +191,9 @@ export default function IndexPage() {
                   playsInline
                   poster="/demo/resume-tailor-demo-poster.png"
                 >
-                  <source src="/demo/resume-tailor-demo.mp4" type="video/mp4" />
+                  <source src="/demo/latexDemoVid.mp4" type="video/mp4" />
                   Your browser does not support the video tag.
                 </video>
-
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="rounded-full bg-background/70 px-4 py-2 text-sm font-semibold text-muted-foreground border border-white/10 shadow-lg backdrop-blur-md">
-                    Tap play to see the workflow
-                  </div>
-                </div>
               </div>
             </div>
           </div>
