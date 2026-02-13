@@ -1,4 +1,4 @@
-import extractHTMLFromUrl from "@/utils/jobPostingParsing/jobPostingParsing"
+import extractHTMLFromUrl from "../utils/jobPostingParsing/jobPostingParsing"
 import { describe, expect, it } from "vitest"
 
 describe("Web Scraping - extractHTMLFromUrl", () => {

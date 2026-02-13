@@ -1,12 +1,23 @@
-import puppeteer from "puppeteer"
+import chromium from "@sparticuz/chromium-min"
+import puppeteer from "puppeteer-core"
+// import puppeteer from "puppeteer"
 
-const fs = require("fs").promises
 
+// const extractHTMLFromUrl = async (url: string): Promise<string> => {
+//   try {
+//     const browser = await puppeteer.launch({ headless: true })
+//     console.log(url, browser)
+//     const page = await browser.newPage()
 const extractHTMLFromUrl = async (url: string): Promise<string> => {
+  let browser
   try {
-    const browser = await puppeteer.launch({ headless: true })
-    console.log(url, browser)
+    browser = await puppeteer.launch({
+      executablePath: await chromium.executablePath(), // points to Vercel-compatible Chromium
+      args: chromium.args,
+      headless: true,
+    })
     const page = await browser.newPage()
+
     try {
       await page.goto(url, { waitUntil: "networkidle2" })
     } catch (err) {
@@ -116,7 +127,8 @@ const extractHTMLFromUrl = async (url: string): Promise<string> => {
         const style = window.getComputedStyle(el)
         if (
           style.display === "none" ||
-          (el instanceof HTMLElement && (el.offsetHeight === 0 || el.offsetWidth === 0))
+          (el instanceof HTMLElement &&
+            (el.offsetHeight === 0 || el.offsetWidth === 0))
         ) {
           el.remove()
         }
