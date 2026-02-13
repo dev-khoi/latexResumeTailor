@@ -67,8 +67,7 @@ export function LoginForm({
       })
       if (error) throw error
       if (data.session) {
-        
-        window.location.href = "/protected"
+        window.location.href = "/resume"
       }
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred")

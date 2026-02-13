@@ -209,13 +209,13 @@ export default function IndexPage() {
       {/* Social Proof Strip */}
       <section className="border-y bg-muted/30">
         <div className="container mx-auto px-4 py-6">
-          <p className="text-center text-sm text-muted-foreground">
+          <div className="text-center text-sm text-muted-foreground">
             Built for engineers, data scientists, and researchers using LaTeX
             resumes
             <Badge variant="outline" className="ml-3">
               No credit card required
             </Badge>
-          </p>
+          </div>
         </div>
       </section>
 
@@ -254,7 +254,10 @@ export default function IndexPage() {
                 "Get a revised LaTeX file with stronger wording, and better keyword alignment—ready to compile.",
             },
           ].map((item, idx) => (
-            <Card key={idx} className="relative overflow-hidden">
+            <Card
+              key={idx}
+              className="relative overflow-hidden shadow-lg dark:shadow-black"
+            >
               <CardHeader>
                 <div className="flex items-center gap-4 mb-2">
                   <div className="flex items-center justify-center w-12 h-12 rounded-full bg-primary text-primary-foreground font-bold text-xl">
