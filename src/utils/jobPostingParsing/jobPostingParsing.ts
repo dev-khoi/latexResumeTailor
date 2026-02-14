@@ -148,7 +148,7 @@ const extractHTMLFromUrl = async (url: string): Promise<string> => {
         args: [...chromium.args, "--hide-scrollbars", "--disable-web-security"],
         // defaultViewport: chromium.defaultViewport,
         executablePath: await chromium.executablePath(
-          `https://github.com/Sparticuz/chromium/releases/download/v143.0.4/chromium-v143.0.4-pack.arm64.tar`
+          `https://github.com/Sparticuz/chromium/releases/download/v143.0.4/chromium-v143.0.4-pack.x64.tar`
         ),
         // headless: chromium.headless,
         // ignoreHTTPSErrors: true,
