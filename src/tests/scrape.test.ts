@@ -1,9 +1,14 @@
-import extractHTMLFromUrl from "../utils/jobPostingParsing/jobPostingParsing"
+import dotenv from "dotenv"
 import { describe, expect, it } from "vitest"
+
+import extractHTMLFromUrl from "../utils/jobPostingParsing/jobPostingParsing"
+
+dotenv.config()
 
 describe("Web Scraping - extractHTMLFromUrl", () => {
   it("should extract HTML content from a valid job posting URL", async () => {
-    const validUrl = "https://www.example.com/careers/software-engineer"
+    const validUrl =
+      "https://proofpoint.wd5.myworkdayjobs.com/proofpointcareers/job/Toronto-Canada/Application-Developer-Programmer-Co-op-Intern_R13688?utm_source=Simplify&ref=Simplify"
 
     const result = await extractHTMLFromUrl(validUrl)
 
